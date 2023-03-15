@@ -16,8 +16,6 @@
 package com.example.dicer
 import android.os.Build
 import android.os.Bundle
-import android.service.autofill.OnClickAction
-import android.widget.TableLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -29,6 +27,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,15 +65,6 @@ fun DiceRollerApp() {
     )
 }
 
-/*
-@RequiresApi(Build.VERSION_CODES.N)
-@Preview
-@Composable
-fun DiceRollerApp() {
-    TableScreen()
-}
-*/
-
 @OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
@@ -82,7 +72,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     val openDialog = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
-
+    var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(15) {null}) } }
     val diceImage = listOf(
         R.drawable.dice_1,
         R.drawable.dice_2,
@@ -138,32 +128,18 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                             )
                     )
                 }
+            }
             item {
                 Button(
-
-                    // on below line we are adding modifier.
-                    // and padding to it,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
                     onClick = {
-
-                        // on below line we are updating
-                        // boolean value of open dialog.
                         openDialog.value = !openDialog.value
-
-                        // on below line we are checking if dialog is close
-                        if (!openDialog.value) {
-
-                        // on below line we are updating value
-                        //buttonTitle.value = "Show Pop Up"
-                        }
                     }
                 ) {
                     Text(text = "Open Stats", modifier = Modifier.padding(3.dp))
                 }
-            }
-
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -182,23 +158,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(openDialog = openDialog, results = results)
-    }
-}
-
-@Composable
-fun pointsWindow() {
-    Dialog(
-        onDismissRequest = {
-            // onDismiss()
-        })
-    {
-        Surface(
-            modifier = Modifier
-                .width(150.dp)
-                .height(300.dp),
-            elevation = 4.dp
-        ) {}
+        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores )
     }
 }
 
@@ -217,53 +177,45 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>) {
-    val rollNames = listOf<String>("Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
+fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+    val rollNames: List<String> = listOf(
+        "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
-        "Chance", "YAHTZEE")
-    var rollScores = remember { MutableList<Int?>(15) {null} }
-    //var results = listOf<Int>(1,3,5,6,2)
+        "Chance", "YAHTZEE"
+    )
 
     fun fillPoints(index: Int): String {
-        println("INESSÄ")
         if (rollScores[index] == null) {
-            println("TYHJA")
             rollScores[index] = results.sum()
             println(rollScores)
             return rollScores[index].toString()
         }
         return ""
     }
+
     @Composable
     fun RowScope.TableCellClickable(
         index: Int,
         weight: Float,
+        text: String
     ) {
-        var scoreText by remember { mutableStateOf<String>("") }.apply { this.value }
         Text(
-            text = scoreText,
+            text = text,
             Modifier
                 .border(1.dp, Color.Black)
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    scoreText = fillPoints(index)
+                    fillPoints(index)
                 })
         )
     }
 
-    val column1Weight = .6f // 30%
-    val column2Weight = .4f // 70%
-    if (openDialog.value) {
-        // on below line we are updating button
-        // title value.
-        //buttonTitle.value = "Hide Pop Up"
-        // on below line we are adding pop up
+    val column1Weight = .6f // 60%
+    val column2Weight = .4f // 40%
 
+    if (openDialog.value) {
         Popup(
-            // on below line we are adding
-            // alignment and properties.
-            //alignment = Alignment.TopCenter,
             properties = PopupProperties()
         ) {
             LazyColumn(
@@ -271,8 +223,7 @@ fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>) {
                     .fillMaxSize()
                     .padding(16.dp)
                     .background(Color.Gray)
-            )
-            {
+            ){
                 item {
                     Row(Modifier.background(Color.Gray)) {
                         TableCell(text = "Rolls", weight = column1Weight)
@@ -281,15 +232,19 @@ fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>) {
                 }
                 items(rollNames) { rollName ->
                     Row(Modifier.fillMaxWidth()) {
+                        var rollNameIndex = rollNames.indexOf(rollName)
                         TableCell(text = rollName, weight = column1Weight)
                         TableCellClickable(
-                            index = rollNames.indexOf(rollName),
-                            weight = column2Weight
+                            index = rollNameIndex,
+                            weight = column2Weight,
+                            text = rollScores[rollNameIndex]?.toString() ?: ""
                         )
                     }
                 }
                 item {
-                    Button(modifier = Modifier.padding(20.dp),  onClick = { openDialog.value = !openDialog.value})
+                    Button(
+                        modifier = Modifier.padding(20.dp),
+                        onClick = { openDialog.value = !openDialog.value })
                     {
                         Text(text = "Close", fontSize = 24.sp)
                     }
@@ -298,3 +253,4 @@ fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>) {
         }
     }
 }
+
