@@ -73,6 +73,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
     var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(15) {null}) } }
+    rollScores[6] = 0
     val diceImage = listOf(
         R.drawable.dice_1,
         R.drawable.dice_2,
@@ -150,7 +151,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                 lockedDices.replaceAll(){false}
             })
             {
-                Text(text = "New Game", fontSize = 24.sp)
+                Text(text = "New Round", fontSize = 24.sp)
             }
         } else {
             Button(onClick = { roll() })
@@ -158,7 +159,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores )
+        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls )
     }
 }
 
@@ -172,25 +173,32 @@ fun RowScope.TableCell(
         Modifier
             .border(1.dp, Color.Black)
             .weight(weight)
-            .padding(8.dp).background(Color.White)
+            .padding(8.dp)
+            .background(Color.White)
     )
 }
 
 @Composable
-fun TableScreen(openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
         "Chance", "YAHTZEE"
     )
 
-    fun fillPoints(index: Int): String {
-        if (rollScores[index] == null) {
-            rollScores[index] = results.sum()
-            println(rollScores)
-            return rollScores[index].toString()
+    fun fillPoints(index: Int): String? {
+        var score = 0
+        if (rollScores[index] == null && rerolls < 3) {
+            score = when (index) {
+                in 0..5 -> results.sumOf {if (it == index+1) it else 0}
+                else -> 0
+            }
+        } else {
+            return null
         }
-        return ""
+        println(" tulos on $score")
+        rollScores[index] = score
+        return score.toString()
     }
 
     @Composable
