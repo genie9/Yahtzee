@@ -140,7 +140,7 @@ fun DiceWithButtonAndImage() {
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
-        if (rerolls <= 0 && pointsFilled.value) {
+        if (rerolls < 3 && pointsFilled.value) {
             Button(onClick = {
                 rerolls = 3
                 results.replaceAll {1}
