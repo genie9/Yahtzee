@@ -158,7 +158,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls )
+        TableScreen(lockedDices = lockedDices, openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls )
     }
 }
 
@@ -178,7 +178,7 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
@@ -196,16 +196,40 @@ fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<In
         }
         return points
     }
+
+    fun threeSame(): Int {
+        val sorted = results.sorted()
+        println(sorted)
+        for (i in 0..2) {
+            if (sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]) {
+                return sorted[i] + sorted[i + 1] + sorted[i + 2]
+            }
+        }
+        return 0
+    }
+
+    fun fourSame(): Int {
+        val sorted = results.sorted()
+        println(sorted)
+        for (i in 0..1) {
+            if (sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]
+                && sorted[i + 2] == sorted[i + 3]) {
+                return sorted[i] + sorted[i + 1] + sorted[i + 2] + sorted[i + 3]
+            }
+        }
+        return 0
+    }
+
     fun fillPoints(index: Int): String? {
         var score = 0
         if (rollScores[index] == null && rerolls < 3) {
             score = when (index) {
                 in 0..5 -> upperStats(index)
+                8 -> threeSame()
+                9 -> fourSame()
                 else -> 0
             }
-        } else {
-            return null
-        }
+        } else { return null }
         rollScores[index] = score
         return score.toString()
     }
