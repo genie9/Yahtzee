@@ -249,6 +249,8 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
                 10 -> fullHouse()
                 11 -> straight(1)
                 12 -> straight(2)
+                13 -> results.sum()
+                14 -> {if (results.all { results[0] == it}) 50 else 0 }
                 else -> 0
             }
         } else { return null }
