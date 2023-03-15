@@ -19,9 +19,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.GridItemSpan
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -57,12 +62,14 @@ fun DiceRollerApp() {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     var results = remember { mutableStateListOf(1,1,1,1,1)}
+
     var rerolls by remember { mutableStateOf(3) }
-    var rerollsMessage: String by remember { mutableStateOf("rolls left $rerolls") }
+
     val diceImage = listOf(
         R.drawable.dice_1,
         R.drawable.dice_2,
@@ -80,21 +87,41 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
             println("rerolls left $rerolls")
         }
     }
+    Column(
+        modifier= Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+        Spacer(modifier = Modifier.height(30.dp))
 
-    Column(modifier = modifier.width(105.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = rerollsMessage, fontSize = 20.sp)
+        Text(text = "rolls left $rerolls", fontSize = 28.sp)
 
-        for (i in results){
-            var dice = diceImage[i-1]
-            Box() {
-                Image(painter = painterResource(id = dice),
-                    contentDescription = diceImage.indexOf(dice).toString())
+        Spacer(modifier = Modifier.height(25.dp))
+
+        LazyVerticalGrid(
+            cells = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalArrangement = Arrangement.spacedBy(70.dp),
+        ) {
+            items(items = results) { item ->
+                Box() {
+                    Image(
+                        painter = painterResource(id = diceImage[item]),
+                        contentDescription = diceImage.indexOf(item).toString()
+                    )
+                }
             }
         }
-        Spacer(modifier = Modifier.height(30.dp))
-        Button(onClick = {roll()})
-        {
-            Text(text = stringResource(R.string.roll), fontSize = 24.sp)
+        Spacer(modifier = Modifier.height(35.dp))
+        if (rerolls == 0) {
+            Button(onClick = { rerolls = 3 })
+            {
+                Text(text = "New Game", fontSize = 24.sp)
+            }
+        } else {
+            Button(onClick = { roll() })
+            {
+                Text(text = stringResource(R.string.roll), fontSize = 24.sp)
+            }
         }
     }
 }
