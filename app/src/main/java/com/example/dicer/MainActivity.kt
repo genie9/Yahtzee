@@ -68,7 +68,8 @@ fun DiceWithButtonAndImage() {
     val pointsFilled = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
-    var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(16) {null}) } }
+    var rollScores = remember { mutableStateListOf<Int?>()
+        .apply { addAll(List<Int?>(16) {null}) } }
 
     val diceImage = listOf(
         R.drawable.dice_1,
@@ -157,7 +158,8 @@ fun DiceWithButtonAndImage() {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(pointsFilled = pointsFilled, openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls)
+        TableScreen(pointsFilled = pointsFilled, openDialog = openDialog, results = results,
+            rollScores = rollScores, rerolls = rerolls)
     }
 }
 
@@ -177,12 +179,14 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>,
+                results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
         "Chance", "YAHTZEE", "TOTAL"
     )
+    var lastIndex by remember { mutableStateOf(-1) }
 
     fun upperStats(index: Int): Int {
         var points = results.sumOf {if (it == index+1) it else 0}
@@ -252,8 +256,12 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 14 -> {if (results.all { results[0] == it}) 50 else 0 }
                 else -> null
             }
+            if ( score != null ) {
+                lastIndex = index
+            }
             rollScores[index] = score
             rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf {it ?: 0}
+            return score
         }
         return null
     }
@@ -271,9 +279,13 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    if (fillPoints(index) != null) {
-                        pointsFilled.value = true
+                    if ( lastIndex > -1 ){
+                        if ( lastIndex in 0..5 ) {
+                            rollScores[6] =- rollScores[lastIndex]!!
+                        }
+                        rollScores[lastIndex] = null
                     }
+                    fillPoints(index)
                 })
         )
     }
@@ -313,7 +325,13 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                         horizontalArrangement = Arrangement.Center) {
                         Button(
                             modifier = Modifier.padding(20.dp),
-                            onClick = { openDialog.value = !openDialog.value })
+                            onClick = {
+                                if ( lastIndex > -1 && rollScores[lastIndex] != null ) {
+                                    pointsFilled.value = true
+                                    lastIndex = -1
+                                    openDialog.value = !openDialog.value
+                                }
+                            })
                         {
                             Text(text = "Accept", fontSize = 24.sp)
                         }
@@ -321,7 +339,7 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                             modifier = Modifier.padding(20.dp),
                             onClick = { openDialog.value = !openDialog.value })
                         {
-                            Text(text = "Undo", fontSize = 24.sp)
+                            Text(text = "Back", fontSize = 24.sp)
                         }
                     }
                 }
