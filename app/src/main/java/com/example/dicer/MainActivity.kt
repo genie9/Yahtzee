@@ -199,7 +199,6 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
 
     fun threeSame(): Int {
         val sorted = results.sorted()
-        println(sorted)
         for (i in 0..2) {
             if (sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]) {
                 return sorted[i] + sorted[i + 1] + sorted[i + 2]
@@ -210,12 +209,21 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
 
     fun fourSame(): Int {
         val sorted = results.sorted()
-        println(sorted)
         for (i in 0..1) {
             if (sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]
                 && sorted[i + 2] == sorted[i + 3]) {
                 return sorted[i] + sorted[i + 1] + sorted[i + 2] + sorted[i + 3]
             }
+        }
+        return 0
+    }
+
+    fun fullHouse(): Int {
+        val sorted = results.sorted()
+        println(sorted)
+        if ( ( sorted[0] == sorted[1] && sorted[1] == sorted[2] && sorted[3] == sorted[4] ) ||
+            ( sorted[0] == sorted[1] && sorted[2] == sorted[3] && sorted[3] == sorted[4] )) {
+            return sorted.sum()
         }
         return 0
     }
@@ -227,6 +235,7 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
                 in 0..5 -> upperStats(index)
                 8 -> threeSame()
                 9 -> fourSame()
+                10 -> fullHouse()
                 else -> 0
             }
         } else { return null }
