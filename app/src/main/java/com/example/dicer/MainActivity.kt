@@ -64,6 +64,7 @@ fun DiceRollerApp() {
 @Composable
 fun DiceWithButtonAndImage() {
     val openDialog = remember { mutableStateOf(false) }
+    val pointsFilled = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
     var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(16) {null}) } }
@@ -139,11 +140,12 @@ fun DiceWithButtonAndImage() {
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
-        if (rerolls <= 0) {
+        if (rerolls <= 0 && pointsFilled.value) {
             Button(onClick = {
                 rerolls = 3
                 results.replaceAll {1}
                 lockedDices.replaceAll {false}
+                pointsFilled.value = false
             })
             {
                 Text(text = "New Round", fontSize = 24.sp)
@@ -154,7 +156,7 @@ fun DiceWithButtonAndImage() {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls)
+        TableScreen(pointsFilled = pointsFilled, openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls)
     }
 }
 
@@ -174,7 +176,7 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
@@ -235,7 +237,7 @@ fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<In
         return 0
     }
 
-    fun fillPoints(index: Int): String? {
+    fun fillPoints(index: Int): Int? {
         var score: Int?
         if (rollScores[index] == null && rerolls < 3) {
             score = when (index) {
@@ -252,7 +254,7 @@ fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<In
         } else { return null }
         rollScores[index] = score
         rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf {it ?: 0}
-        return score.toString()
+        return score
     }
 
     @Composable
@@ -268,7 +270,8 @@ fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<In
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    fillPoints(index)
+                    if ( fillPoints(index) != null ) {
+                        pointsFilled.value = true}
                 })
         )
     }
