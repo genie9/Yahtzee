@@ -16,17 +16,17 @@
 package com.example.dicer
 import android.os.Build
 import android.os.Bundle
+import android.service.autofill.OnClickAction
+import android.widget.TableLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.dicer.ui.theme.DicerTheme
 import kotlin.random.Random
 
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
+/*
 @RequiresApi(Build.VERSION_CODES.N)
 @Preview
 @Composable
@@ -60,6 +61,14 @@ fun DiceRollerApp() {
         .fillMaxSize()
         .wrapContentSize(Alignment.Center)
     )
+}
+*/
+
+@RequiresApi(Build.VERSION_CODES.N)
+@Preview
+@Composable
+fun DiceRollerApp() {
+    TableScreen()
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -140,6 +149,105 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
             Button(onClick = { roll() })
             {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
+            }
+        }
+    }
+
+
+    }
+
+@Composable
+fun pointsWindow() {
+    Dialog(
+        onDismissRequest = {
+            // onDismiss()
+        })
+    {
+        Surface(
+            modifier = Modifier
+                .width(150.dp)
+                .height(300.dp),
+            elevation = 4.dp
+        ) {}
+    }
+}
+
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float
+) {
+    Text(
+        text = text,
+        Modifier
+            .border(1.dp, Color.Black)
+            .weight(weight)
+            .padding(8.dp)
+    )
+}
+
+
+
+
+@Composable
+fun TableScreen() {
+    val rollNames = listOf<String>("Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
+        "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
+        "Chance", "YAHTZEE")
+    var rollScores = remember { MutableList<Int?>(15) {null} }
+    var results = listOf<Int>(1,3,5,6,2)
+
+    fun fillPoints(index: Int): String {
+        println("INESSÄ")
+        if (rollScores[index] == null) {
+            println("TYHJA")
+            rollScores[index] = results.sum()
+            println(rollScores)
+            return rollScores[index].toString()
+        }
+        return ""
+    }
+    @Composable
+    fun RowScope.TableCellClickable(
+        index: Int,
+        weight: Float,
+        //points: List<Int>
+    ) {
+        var scoreText by remember { mutableStateOf<String>("") }.apply { this.value }
+        Text(
+            text = scoreText,
+            Modifier
+                .border(1.dp, Color.Black)
+                .weight(weight)
+                .padding(8.dp)
+                .clickable(onClick = {
+                    scoreText = fillPoints(index)
+                    })
+        )
+    }
+
+    // Each cell of a column must have the same weight.
+    val column1Weight = .6f // 30%
+    val column2Weight = .4f // 70%
+    // The LazyColumn will be our table. Notice the use of the weights below
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
+        // Here is the header
+        item {
+            Row(Modifier.background(Color.Gray)) {
+                TableCell(text = "Rolls", weight = column1Weight)
+                TableCell(text = "Points", weight = column2Weight)
+            }
+        }
+        // Here are all the lines of your table.
+        items(rollNames) {rollName ->
+            Row(Modifier.fillMaxWidth()) {
+                TableCell(text = rollName, weight = column1Weight)
+                TableCellClickable(
+                    index = rollNames.indexOf(rollName),
+                    weight = column2Weight)
             }
         }
     }
