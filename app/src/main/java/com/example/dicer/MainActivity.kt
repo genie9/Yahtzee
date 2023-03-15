@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -36,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.dicer.ui.theme.DicerTheme
@@ -73,7 +71,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
     var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(15) {null}) } }
-    rollScores[6] = 0
+
     val diceImage = listOf(
         R.drawable.dice_1,
         R.drawable.dice_2,
@@ -87,15 +85,16 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     fun roll() {
         if(rerolls > 0) {
             if (!lockedDices.contains(true)) {
-                results.replaceAll() { Random.nextInt(1, 6) }
+                results.replaceAll() { Random.nextInt(1, 7) }
             } else {
-                    for (i in 0..4){
+                for (i in 0..4){
                     results[i] = if (lockedDices[i]) results[i]  else (1..6).random()
                 }
             }
             rerolls -= 1
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -186,17 +185,27 @@ fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<In
         "Chance", "YAHTZEE"
     )
 
+    fun upperStats(index: Int): Int {
+        var points = results.sumOf {if (it == index+1) it else 0}
+        rollScores[index] = points
+        var upperScores = rollScores.slice(0..5).toMutableList()
+        var upperTotal = upperScores.sumOf() {it ?: 0}
+        rollScores[6] = upperTotal
+        if (upperTotal >= 63 ) {
+            rollScores[7] = 35
+        }
+        return points
+    }
     fun fillPoints(index: Int): String? {
         var score = 0
         if (rollScores[index] == null && rerolls < 3) {
             score = when (index) {
-                in 0..5 -> results.sumOf {if (it == index+1) it else 0}
+                in 0..5 -> upperStats(index)
                 else -> 0
             }
         } else {
             return null
         }
-        println(" tulos on $score")
         rollScores[index] = score
         return score.toString()
     }
