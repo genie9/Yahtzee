@@ -52,23 +52,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.N)
 @Preview
 @Composable
 fun DiceRollerApp() {
-    DiceWithButtonAndImage(modifier = Modifier
-        .fillMaxSize()
-        .wrapContentSize(Alignment.Center)
-    )
+    DiceWithButtonAndImage()
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
-fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
+fun DiceWithButtonAndImage() {
     val openDialog = remember { mutableStateOf(false) }
-    var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
+    var results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
     var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(16) {null}) } }
 
@@ -80,12 +76,12 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
         R.drawable.dice_5,
         R.drawable.dice_6)
 
-    var lockedDices = remember { mutableStateListOf<Boolean>(false, false, false, false, false) }
+    var lockedDices = remember { mutableStateListOf(false, false, false, false, false) }
 
     fun roll() {
         if(rerolls > 0) {
             if (!lockedDices.contains(true)) {
-                results.replaceAll() { Random.nextInt(1, 7) }
+                results.replaceAll { Random.nextInt(1, 7) }
             } else {
                 for (i in 0..4){
                     results[i] = if (lockedDices[i]) results[i]  else (1..6).random()
@@ -103,7 +99,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
         ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = "rolls left $rerolls", fontSize = 28.sp)
+        Text(text = "Rolls left $rerolls", fontSize = 28.sp)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -138,7 +134,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                         openDialog.value = !openDialog.value
                     }
                 ) {
-                    Text(text = "Open Stats", modifier = Modifier.padding(3.dp))
+                    Text(text = "Points Sheet", modifier = Modifier.padding(0.dp))
                 }
             }
         }
@@ -147,7 +143,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
             Button(onClick = {
                 rerolls = 3
                 results.replaceAll {1}
-                lockedDices.replaceAll(){false}
+                lockedDices.replaceAll {false}
             })
             {
                 Text(text = "New Round", fontSize = 24.sp)
@@ -158,7 +154,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(lockedDices = lockedDices, openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls )
+        TableScreen(openDialog = openDialog, results = results, rollScores = rollScores, rerolls = rerolls)
     }
 }
 
@@ -178,7 +174,7 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
+fun TableScreen(rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
@@ -189,7 +185,7 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
         var points = results.sumOf {if (it == index+1) it else 0}
         rollScores[index] = points
         var upperScores = rollScores.slice(0..5).toMutableList()
-        var upperTotal = upperScores.sumOf() {it ?: 0}
+        var upperTotal = upperScores.sumOf {it ?: 0}
         rollScores[6] = upperTotal
         if (upperTotal >= 63 ) {
             rollScores[7] = 35
@@ -240,7 +236,7 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
     }
 
     fun fillPoints(index: Int): String? {
-        var score = 0
+        var score: Int?
         if (rollScores[index] == null && rerolls < 3) {
             score = when (index) {
                 in 0..5 -> upperStats(index)
@@ -251,11 +247,11 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
                 12 -> straight(2)
                 13 -> results.sum()
                 14 -> {if (results.all { results[0] == it}) 50 else 0 }
-                else -> 0
+                else -> null
             }
         } else { return null }
         rollScores[index] = score
-        rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf() {it ?: 0}
+        rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf {it ?: 0}
         return score.toString()
     }
 
