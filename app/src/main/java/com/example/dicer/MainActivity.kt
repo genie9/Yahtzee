@@ -70,7 +70,7 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
     val openDialog = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
     var rerolls by remember { mutableStateOf(3) }
-    var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(15) {null}) } }
+    var rollScores = remember { mutableStateListOf<Int?>().apply { addAll(List<Int?>(16) {null}) } }
 
     val diceImage = listOf(
         R.drawable.dice_1,
@@ -180,9 +180,9 @@ fun RowScope.TableCell(
 @Composable
 fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>, results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
-        "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Total",
+        "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
-        "Chance", "YAHTZEE"
+        "Chance", "YAHTZEE", "TOTAL"
     )
 
     fun upperStats(index: Int): Int {
@@ -255,6 +255,7 @@ fun TableScreen(lockedDices: SnapshotStateList<Boolean>, rerolls:Int, openDialog
             }
         } else { return null }
         rollScores[index] = score
+        rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf() {it ?: 0}
         return score.toString()
     }
 
