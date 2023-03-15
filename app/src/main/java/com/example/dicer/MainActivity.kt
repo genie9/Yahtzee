@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.dicer.ui.theme.DicerTheme
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -118,7 +119,7 @@ fun DiceWithButtonAndImage() {
                         painter = painterResource(id = diceImage[item-1]),
                         contentDescription = diceImage.indexOf(item).toString(),
                         modifier = Modifier
-                            .size(180.dp)
+                            .size(170.dp)
                             .background(
                                 color = if (lockedDices[index]) Color.Blue else Color.Gray,
                                 shape = CircleShape
@@ -251,10 +252,10 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 14 -> {if (results.all { results[0] == it}) 50 else 0 }
                 else -> null
             }
-        } else { return null }
-        rollScores[index] = score
-        rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf {it ?: 0}
-        return score
+            rollScores[index] = score
+            rollScores[15] = rollScores.slice(6..14).toMutableList().sumOf {it ?: 0}
+        }
+        return null
     }
 
     @Composable
@@ -270,8 +271,9 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    if ( fillPoints(index) != null ) {
-                        pointsFilled.value = true}
+                    if (fillPoints(index) != null) {
+                        pointsFilled.value = true
+                    }
                 })
         )
     }
@@ -291,8 +293,8 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
             ){
                 item {
                     Row(Modifier.background(Color.Gray)) {
-                        TableCell(text = "Rolls", weight = column1Weight)
-                        TableCell(text = "Points", weight = column2Weight)
+                        TableCell(text = "ROLLS", weight = column1Weight)
+                        TableCell(text = "POINTS", weight = column2Weight)
                     }
                 }
                 items(rollNames) { rollName ->
@@ -307,15 +309,26 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                     }
                 }
                 item {
-                    Button(
-                        modifier = Modifier.padding(20.dp),
-                        onClick = { openDialog.value = !openDialog.value })
-                    {
-                        Text(text = "Close", fontSize = 24.sp)
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center) {
+                        Button(
+                            modifier = Modifier.padding(20.dp),
+                            onClick = { openDialog.value = !openDialog.value })
+                        {
+                            Text(text = "Accept", fontSize = 24.sp)
+                        }
+                        Button(
+                            modifier = Modifier.padding(20.dp),
+                            onClick = { openDialog.value = !openDialog.value })
+                        {
+                            Text(text = "Undo", fontSize = 24.sp)
+                        }
                     }
                 }
             }
         }
     }
 }
+
+
 
