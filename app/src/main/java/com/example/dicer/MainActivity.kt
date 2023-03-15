@@ -21,17 +21,17 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.GridItemSpan
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +66,7 @@ fun DiceRollerApp() {
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
-    var results = remember { mutableStateListOf(1,1,1,1,1)}
+    var results: MutableList<Int> = remember { mutableListOf<Int>(1,1,1,1,1) }
 
     var rerolls by remember { mutableStateOf(3) }
 
@@ -78,42 +78,61 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
         R.drawable.dice_5,
         R.drawable.dice_6)
 
-    var locked = mutableListOf<Int>()
+    var lockedDices = remember { mutableStateListOf<Boolean>(false, false, false, false, false) }
 
     fun roll() {
         if(rerolls > 0) {
-            results.replaceAll() { Random.nextInt(1, 6) }
+            if (!lockedDices.contains(true)) {
+                results.replaceAll() { Random.nextInt(1, 6) }
+            } else {
+                    for (i in 0..4){
+                    results[i] = if (lockedDices[i]) results[i]  else (1..6).random()
+                }
+            }
             rerolls -= 1
-            println("rerolls left $rerolls")
         }
     }
+
     Column(
         modifier= Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(text = "rolls left $rerolls", fontSize = 28.sp)
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalArrangement = Arrangement.spacedBy(70.dp),
         ) {
-            items(items = results) { item ->
-                Box() {
+            itemsIndexed(results) { index: Int, item: Int ->
+                Box(modifier = Modifier.clickable(onClick = {
+                    if (rerolls < 3) { lockedDices[index] = !lockedDices[index] }
+                    })
+                ) {
                     Image(
-                        painter = painterResource(id = diceImage[item]),
-                        contentDescription = diceImage.indexOf(item).toString()
+                        painter = painterResource(id = diceImage[item-1]),
+                        contentDescription = diceImage.indexOf(item).toString(),
+                        modifier = Modifier
+                            .size(180.dp)
+                            .background(
+                                color = if (lockedDices[index]) Color.Blue else Color.Gray,
+                                shape = CircleShape
+                            )
                     )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(35.dp))
-        if (rerolls == 0) {
-            Button(onClick = { rerolls = 3 })
+        Spacer(modifier = Modifier.height(15.dp))
+        if (rerolls <= 0) {
+            Button(onClick = {
+                rerolls = 3
+                results.replaceAll {1}
+                lockedDices.replaceAll(){false}
+            })
             {
                 Text(text = "New Game", fontSize = 24.sp)
             }
