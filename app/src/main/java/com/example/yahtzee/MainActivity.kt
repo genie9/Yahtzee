@@ -66,6 +66,7 @@ fun YahtzeeMain() {
     val openDialog = remember { mutableStateOf(false) }
     val pointsFilled = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
+    var rounds: MutableState<Int> = remember { mutableStateOf(13) }
     var rerolls by remember { mutableStateOf(3) }
     var rollScores = remember { mutableStateListOf<Int?>()
         .apply { addAll(List<Int?>(16) {null}) } }
@@ -101,7 +102,7 @@ fun YahtzeeMain() {
     ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = "Rolls left $rerolls", fontSize = 28.sp)
+        Text(text = if (rounds.value == 0) "Your total points are ${rollScores[15]}" else "Rolls left $rerolls", fontSize = 28.sp)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -147,9 +148,13 @@ fun YahtzeeMain() {
                 results.replaceAll {1}
                 lockedDices.replaceAll {false}
                 pointsFilled.value = false
+                if ( rounds.value == 0 ){
+                    rounds.value = 13
+                    rollScores.apply { replaceAll { null } }
+                }
             })
             {
-                Text(text = "New Round", fontSize = 24.sp)
+                Text(text = if (rounds.value == 0) "New Game" else "New Round", fontSize = 24.sp)
             }
         } else {
             Button(onClick = { roll() })
@@ -157,7 +162,7 @@ fun YahtzeeMain() {
                 Text(text = stringResource(R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(pointsFilled = pointsFilled, openDialog = openDialog, results = results,
+        TableScreen(rounds = rounds, pointsFilled = pointsFilled, openDialog = openDialog, results = results,
             rollScores = rollScores, rerolls = rerolls)
     }
 }
@@ -178,7 +183,7 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>,
+fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>,
                 results: List<Int>, rollScores: SnapshotStateList<Int?>) {
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
@@ -280,7 +285,7 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    if (index !in intArrayOf(6,7,16) ) {
+                    if (index !in intArrayOf(6,7,15) ) {
                         if ( lastIndex > -1 ){
                             if ( lastIndex in 0..5 ) {
                                 rollScores[6] = rollScores[6]?.minus(rollScores[lastIndex]!!)
@@ -332,6 +337,7 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                                 if ( lastIndex > -1 && rollScores[lastIndex] != null ) {
                                     pointsFilled.value = true
                                     lastIndex = -1
+                                    rounds.value -= 1
                                     openDialog.value = !openDialog.value
                                 }
                             })
