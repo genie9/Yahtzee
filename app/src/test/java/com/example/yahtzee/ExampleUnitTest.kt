@@ -1,4 +1,4 @@
-package com.example.dicer
+package com.example.yahtzee
 
 import org.junit.Test
 

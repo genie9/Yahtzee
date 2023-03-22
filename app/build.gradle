@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.dicer'
+    namespace 'com.example.yahtzee'
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.dicer"
+        applicationId "com.example.yahtzee"
         minSdk 24
         targetSdk 32
         versionCode 1

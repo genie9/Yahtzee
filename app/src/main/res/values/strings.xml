@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Dicer</string>
+    <string name="app_name">Yahtzee</string>
     <string name="roll">Roll</string>
 </resources>

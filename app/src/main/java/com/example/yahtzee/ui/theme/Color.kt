@@ -1,4 +1,4 @@
-package com.example.dicer.ui.theme
+package com.example.yahtzee.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.dicer
+package com.example.yahtzee
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -37,8 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.example.dicer.ui.theme.DicerTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import com.example.yahtzee.ui.theme.YahtzeeTheme
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -46,8 +45,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DicerTheme {
-                DiceRollerApp()
+            YahtzeeTheme {
+                YahtzeeApp()
             }
         }
     }
@@ -56,14 +55,14 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.N)
 @Preview
 @Composable
-fun DiceRollerApp() {
-    DiceWithButtonAndImage()
+fun YahtzeeApp() {
+    YahtzeeMain()
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
-fun DiceWithButtonAndImage() {
+fun YahtzeeMain() {
     val openDialog = remember { mutableStateOf(false) }
     val pointsFilled = remember { mutableStateOf(false) }
     var results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
