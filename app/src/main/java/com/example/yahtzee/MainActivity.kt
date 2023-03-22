@@ -17,6 +17,7 @@ package com.example.yahtzee
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -77,16 +78,15 @@ fun YahtzeeMain() {
 
     val lockedDices = remember { mutableStateListOf(false, false, false, false, false) }
 
-    fun roll() {
-        if(rerolls > 0) {
-            if (!lockedDices.contains(true)) {
-                results.replaceAll { Random.nextInt(1, 7) }
-            } else {
-                for (i in 0..4){
-                    results[i] = if (lockedDices[i]) results[i]  else (1..6).random()
-                }
-            }
-            rerolls -= 1
+    @VisibleForTesting
+    fun newRoundActions() {
+        rerolls = 3
+        results.replaceAll { 1 }
+        lockedDices.replaceAll { false }
+        pointsFilled.value = false
+        if (rounds.value == 0) {
+            rounds.value = 13
+            rollScores.apply { addAll(List<Int>(16) { -1 }) }
         }
     }
 
@@ -140,26 +140,34 @@ fun YahtzeeMain() {
         Spacer(modifier = Modifier.height(15.dp))
         if (rerolls < 3 && pointsFilled.value) {
             Button(onClick = {
-                rerolls = 3
-                results.replaceAll {1}
-                lockedDices.replaceAll {false}
-                pointsFilled.value = false
-                if ( rounds.value == 0 ){
-                    rounds.value = 13
-                    rollScores.apply { replaceAll { -1 } }
-                }
+                newRoundActions()
             })
             {
                 Text(text = if (rounds.value == 0) "New Game" else "New Round", fontSize = 24.sp)
             }
         } else {
-            Button(onClick = { roll() })
+            Button(onClick = {
+                roll(rerolls, lockedDices, results)
+                if ( rerolls > 0) rerolls -= 1 })
             {
                 Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
             }
         }
         TableScreen(rounds = rounds, pointsFilled = pointsFilled, openDialog = openDialog, results = results,
             rollScores = rollScores, rerolls = rerolls)
+    }
+}
+
+@VisibleForTesting
+fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>) {
+    if (rerolls > 0) {
+        if (!lockedDices.contains(true)) {
+            results.replaceAll { Random.nextInt(1, 7) }
+        } else {
+            for (i in 0..4) {
+                results[i] = if (lockedDices[i]) results[i] else (1..6).random()
+            }
+        }
     }
 }
 
@@ -181,6 +189,10 @@ fun RowScope.TableCell(
 @Composable
 fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>,
                 results: List<Int>, rollScores: SnapshotStateList<Int>) {
+
+    val column1Weight = .6f // 60%
+    val column2Weight = .4f // 40%
+    
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
@@ -275,6 +287,18 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
         weight: Float,
         text: String
     ) {
+        fun checkIfFillable(): Boolean {
+            if (index !in intArrayOf(6, 7, 15)) {
+                if (lastIndex > -1) {
+                    if (lastIndex in 0..5) {
+                        rollScores[6] = rollScores[6].minus(rollScores[lastIndex])
+                    }
+                    rollScores[lastIndex] = -1
+                }
+                return true
+            }
+            return false
+        }
         Text(
             text = text,
             Modifier
@@ -282,21 +306,24 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    if (index !in intArrayOf(6,7,15) ) {
-                        if ( lastIndex > -1 ){
-                            if ( lastIndex in 0..5 ) {
-                                rollScores[6] = rollScores[6].minus(rollScores[lastIndex])
-                            }
-                            rollScores[lastIndex] = -1
-                        }
+                    if (checkIfFillable()) {
                         fillPoints(index)
                     }
                 })
         )
     }
 
-    val column1Weight = .6f // 60%
-    val column2Weight = .4f // 40%
+    @VisibleForTesting
+    fun acceptRound() {
+        if (lastIndex > -1 && rollScores[lastIndex] != -1
+            && rounds.value > 0
+        ) {
+            pointsFilled.value = true
+            lastIndex = -1
+            rounds.value -= 1
+            openDialog.value = !openDialog.value
+        }
+    }
 
     if (openDialog.value) {
         Popup(
