@@ -39,6 +39,7 @@ import com.example.yahtzee.ui.theme.YahtzeeTheme
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
