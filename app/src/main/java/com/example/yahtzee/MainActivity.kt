@@ -102,11 +102,13 @@ fun YahtzeeMain() {
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = if (rounds.value == 0) "Your total points are ${rollScores[15]}"
-            else "Rolls left $rerolls",
-            fontSize = 28.sp
+            text = if (rounds.value == 0) stringResource(
+                id = R.string.total_points_info,
+                rollScores[15]
+            )
+            else stringResource(R.string.rolls_info, rerolls),
+                fontSize = 28.sp
         )
-
         Spacer(modifier = Modifier.height(10.dp))
 
         LazyVerticalGrid(
@@ -143,7 +145,10 @@ fun YahtzeeMain() {
                         openDialog.value = !openDialog.value
                     }
                 ) {
-                    Text(text = "Points Sheet", modifier = Modifier.padding(0.dp))
+                    Text(
+                        text = stringResource(id = R.string.points_sheet),
+                        modifier = Modifier.padding(0.dp)
+                    )
                 }
             }
         }
@@ -153,7 +158,10 @@ fun YahtzeeMain() {
                 newRoundActions()
             })
             {
-                Text(text = if (rounds.value == 0) "New Game" else "New Round", fontSize = 24.sp)
+                Text(
+                    text = if (rounds.value == 0) stringResource(R.string.new_game)
+                    else stringResource(R.string.new_round), fontSize = 24.sp
+                )
             }
         } else {
             Button(onClick = {
@@ -366,8 +374,14 @@ fun TableScreen(
             ) {
                 item {
                     Row(Modifier.background(Color.Gray)) {
-                        TableCell(text = "ROLLS", weight = column1Weight)
-                        TableCell(text = "POINTS", weight = column2Weight)
+                        TableCell(
+                            text = stringResource(id = R.string.column_rolls),
+                            weight = column1Weight
+                        )
+                        TableCell(
+                            text = stringResource(id = R.string.column_points),
+                            weight = column2Weight
+                        )
                     }
                 }
                 items(rollNames) { rollName ->
@@ -389,15 +403,18 @@ fun TableScreen(
                     ) {
                         Button(
                             modifier = Modifier.padding(20.dp),
-                            onClick = { acceptRound() })
+                            onClick = {
+                                acceptRound()
+                            })
                         {
-                            Text(text = "Accept", fontSize = 24.sp)
+                            Text(text = stringResource(id = R.string.button_accept),
+                                fontSize = 24.sp)
                         }
                         Button(
                             modifier = Modifier.padding(20.dp),
                             onClick = { openDialog.value = !openDialog.value })
                         {
-                            Text(text = "Back", fontSize = 24.sp)
+                            Text(text = stringResource(id = R.string.button_back),fontSize = 24.sp)
                         }
                     }
                 }
