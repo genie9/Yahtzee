@@ -98,7 +98,7 @@ fun YahtzeeMain() {
             .fillMaxSize()
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    ) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(text = "Rolls left $rerolls", fontSize = 28.sp)
@@ -113,7 +113,7 @@ fun YahtzeeMain() {
             itemsIndexed(results) { index: Int, item: Int ->
                 Box(modifier = Modifier.clickable(onClick = {
                     if (rerolls < 3) { lockedDices[index] = !lockedDices[index] }
-                    })
+                })
                 ) {
                     Image(
                         painter = painterResource(id = diceImage[item-1]),
@@ -195,6 +195,8 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
         rollScores[6] = upperTotal
         if (upperTotal >= 63 ) {
             rollScores[7] = 35
+        } else {
+            rollScores[7] = 0
         }
         return points
     }
@@ -278,13 +280,15 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
                 .weight(weight)
                 .padding(8.dp)
                 .clickable(onClick = {
-                    if ( lastIndex > -1 ){
-                        if ( lastIndex in 0..5 ) {
-                            rollScores[6] =- rollScores[lastIndex]!!
+                    if (index !in intArrayOf(6,7,16) ) {
+                        if ( lastIndex > -1 ){
+                            if ( lastIndex in 0..5 ) {
+                                rollScores[6] = rollScores[6]?.minus(rollScores[lastIndex]!!)
+                            }
+                            rollScores[lastIndex] = null
                         }
-                        rollScores[lastIndex] = null
+                        fillPoints(index)
                     }
-                    fillPoints(index)
                 })
         )
     }
@@ -346,6 +350,5 @@ fun TableScreen(pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: Mu
         }
     }
 }
-
 
 
