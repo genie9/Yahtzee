@@ -29,6 +29,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,7 +90,7 @@ fun YahtzeeMain() {
         pointsFilled.value = false
         if (rounds.value == 0) {
             rounds.value = 13
-            rollScores.apply { addAll(List(16) { -1 }) }
+            rollScores.apply { replaceAll { -1 } }
         }
     }
 
@@ -224,6 +225,7 @@ fun TableScreen(
 
     val column1Weight = .6f // 60%
     val column2Weight = .4f // 40%
+    var enableAccept = remember { mutableStateOf(false) }
 
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
@@ -309,6 +311,7 @@ fun TableScreen(
             }
             if (score != -1) {
                 lastIndex = index
+                enableAccept.value = true
             }
             rollScores[index] = score
             rollScores[15] =
@@ -343,6 +346,7 @@ fun TableScreen(
                 .border(1.dp, Color.Black)
                 .weight(weight)
                 .padding(8.dp)
+                .testTag("points_$index")
                 .clickable(onClick = {
                     if (checkIfFillable()) {
                         fillPoints(index)
@@ -360,6 +364,7 @@ fun TableScreen(
             lastIndex = -1
             rounds.value -= 1
             openDialog.value = !openDialog.value
+            enableAccept.value = false
         }
     }
 
@@ -404,6 +409,7 @@ fun TableScreen(
                     ) {
                         Button(
                             modifier = Modifier.padding(20.dp),
+                            enabled = enableAccept.value,
                             onClick = {
                                 acceptRound()
                             })
