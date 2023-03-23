@@ -208,7 +208,7 @@ fun RowScope.TableCell(
         Modifier
             .border(1.dp, Color.Black)
             .weight(weight)
-            .padding(8.dp)
+            .padding(4.dp)
             .background(Color.White)
     )
 }
@@ -345,7 +345,7 @@ fun TableScreen(
             Modifier
                 .border(1.dp, Color.Black)
                 .weight(weight)
-                .padding(8.dp)
+                .padding(4.dp)
                 .testTag("points_$index")
                 .clickable(onClick = {
                     if (checkIfFillable()) {

@@ -61,6 +61,7 @@ class YahtzeeUITest {
             }
         }
         composeTestRule.onNodeWithText("New Game").assertIsDisplayed()
+        composeTestRule.onNodeWithText("New Game").performClick()
         composeTestRule.onNodeWithText("Points Sheet").performClick()
         for (i in 0..14){
             composeTestRule.onNodeWithTag("points_$i").assertTextEquals("","")
