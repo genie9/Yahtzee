@@ -184,7 +184,7 @@ fun YahtzeeMain() {
 }
 
 @VisibleForTesting
-fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>) {
+fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>): MutableList<Int> {
     if (rerolls > 0) {
         if (!lockedDices.contains(true)) {
             results.replaceAll { Random.nextInt(1, 7) }
@@ -194,6 +194,7 @@ fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: Mutable
             }
         }
     }
+    return results
 }
 
 @Composable
