@@ -62,11 +62,13 @@ fun YahtzeeApp() {
 fun YahtzeeMain() {
     val openDialog = remember { mutableStateOf(false) }
     val pointsFilled = remember { mutableStateOf(false) }
-    val results: MutableList<Int> = remember { mutableListOf(1,1,1,1,1) }
+    val results: MutableList<Int> = remember { mutableListOf(1, 1, 1, 1, 1) }
     val rounds: MutableState<Int> = remember { mutableStateOf(13) }
     var rerolls by remember { mutableStateOf(3) }
-    val rollScores = remember { mutableStateListOf<Int>()
-        .apply { addAll(List(16) {-1}) } }
+    val rollScores = remember {
+        mutableStateListOf<Int>()
+            .apply { addAll(List(16) { -1 }) }
+    }
 
     val diceImage = listOf(
         R.drawable.dice_1,
@@ -74,7 +76,8 @@ fun YahtzeeMain() {
         R.drawable.dice_3,
         R.drawable.dice_4,
         R.drawable.dice_5,
-        R.drawable.dice_6)
+        R.drawable.dice_6
+    )
 
     val lockedDices = remember { mutableStateListOf(false, false, false, false, false) }
 
@@ -98,7 +101,11 @@ fun YahtzeeMain() {
     ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = if (rounds.value == 0) "Your total points are ${rollScores[15]}" else "Rolls left $rerolls", fontSize = 28.sp)
+        Text(
+            text = if (rounds.value == 0) "Your total points are ${rollScores[15]}"
+            else "Rolls left $rerolls",
+            fontSize = 28.sp
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -108,12 +115,15 @@ fun YahtzeeMain() {
             horizontalArrangement = Arrangement.spacedBy(70.dp),
         ) {
             itemsIndexed(results) { index: Int, item: Int ->
-                Box(modifier = Modifier.clickable(onClick = {
-                    if (rerolls < 3) { lockedDices[index] = !lockedDices[index] }
-                })
+                Box(
+                    modifier = Modifier.clickable(onClick = {
+                        if (rerolls < 3) {
+                            lockedDices[index] = !lockedDices[index]
+                        }
+                    })
                 ) {
                     Image(
-                        painter = painterResource(id = diceImage[item-1]),
+                        painter = painterResource(id = diceImage[item - 1]),
                         contentDescription = diceImage.indexOf(item).toString(),
                         modifier = Modifier
                             .size(170.dp)
@@ -148,13 +158,20 @@ fun YahtzeeMain() {
         } else {
             Button(onClick = {
                 roll(rerolls, lockedDices, results)
-                if ( rerolls > 0) rerolls -= 1 })
+                if (rerolls > 0) rerolls -= 1
+            })
             {
                 Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
             }
         }
-        TableScreen(rounds = rounds, pointsFilled = pointsFilled, openDialog = openDialog, results = results,
-            rollScores = rollScores, rerolls = rerolls)
+        TableScreen(
+            rounds = rounds,
+            pointsFilled = pointsFilled,
+            openDialog = openDialog,
+            results = results,
+            rollScores = rollScores,
+            rerolls = rerolls
+        )
     }
 }
 
@@ -187,12 +204,18 @@ fun RowScope.TableCell(
 }
 
 @Composable
-fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, rerolls:Int, openDialog: MutableState<Boolean>,
-                results: List<Int>, rollScores: SnapshotStateList<Int>) {
+fun TableScreen(
+    rounds: MutableState<Int>,
+    pointsFilled: MutableState<Boolean>,
+    rerolls: Int,
+    openDialog: MutableState<Boolean>,
+    results: List<Int>,
+    rollScores: SnapshotStateList<Int>
+) {
 
     val column1Weight = .6f // 60%
     val column2Weight = .4f // 40%
-    
+
     val rollNames: List<String> = listOf(
         "Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Upper Total",
         "Bonus", "Same of Three", "Same of Four", "Full House", "Small Straight", "Big Straight",
@@ -201,12 +224,12 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
     var lastIndex by remember { mutableStateOf(-1) }
 
     fun upperStats(index: Int): Int {
-        val points = results.sumOf {if (it == index+1) it else 0}
+        val points = results.sumOf { if (it == index + 1) it else 0 }
         rollScores[index] = points
         val upperScores = rollScores.slice(0..5).toMutableList()
         val upperTotal = upperScores.sumOf { if (it != -1) it else 0 }
         rollScores[6] = upperTotal
-        if (upperTotal >= 63 ) {
+        if (upperTotal >= 63) {
             rollScores[7] = 35
         } else {
             rollScores[7] = 0
@@ -226,9 +249,10 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
 
     fun fourSame(): Int {
         val sorted = results.sorted()
-        for ( i in 0..1 ) {
-            if ( sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]
-                && sorted[i + 2] == sorted[i + 3] ) {
+        for (i in 0..1) {
+            if (sorted[i] == sorted[i + 1] && sorted[i + 1] == sorted[i + 2]
+                && sorted[i + 2] == sorted[i + 3]
+            ) {
                 return sorted[i] + sorted[i + 1] + sorted[i + 2] + sorted[i + 3]
             }
         }
@@ -237,8 +261,9 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
 
     fun fullHouse(): Int {
         val sorted = results.sorted()
-        if ( ( sorted[0] == sorted[1] && sorted[1] == sorted[2] && sorted[3] == sorted[4] ) ||
-            ( sorted[0] == sorted[1] && sorted[2] == sorted[3] && sorted[3] == sorted[4] ) ) {
+        if ((sorted[0] == sorted[1] && sorted[1] == sorted[2] && sorted[3] == sorted[4]) ||
+            (sorted[0] == sorted[1] && sorted[2] == sorted[3] && sorted[3] == sorted[4])
+        ) {
             return sorted.sum()
         }
         return 0
@@ -246,11 +271,12 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
 
     fun straight(first: Int): Int {
         val sorted = results.sorted()
-        if ( sorted[0] == first
-            && sorted[1] == sorted[0]+1
-            && sorted[2] == sorted[1]+1
-            && sorted[3] == sorted[2]+1
-            && sorted[4] == sorted[3]+1 ) {
+        if (sorted[0] == first
+            && sorted[1] == sorted[0] + 1
+            && sorted[2] == sorted[1] + 1
+            && sorted[3] == sorted[2] + 1
+            && sorted[4] == sorted[3] + 1
+        ) {
             return sorted.sum()
         }
         return 0
@@ -267,15 +293,18 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
                 11 -> straight(1)
                 12 -> straight(2)
                 13 -> results.sum()
-                14 -> {if (results.all { results[0] == it}) 50 else 0 }
+                14 -> {
+                    if (results.all { results[0] == it }) 50 else 0
+                }
                 else -> -1
             }
-            if ( score != -1 ) {
+            if (score != -1) {
                 lastIndex = index
             }
             rollScores[index] = score
             rollScores[15] =
-                rollScores.slice(6..14).toMutableList().sumOf { if (it != -1) it else 0 }
+                rollScores.slice(6..14).toMutableList()
+                    .sumOf { if (it != -1) it else 0 }
             return score
         }
         return -1
@@ -334,7 +363,7 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
                     .fillMaxSize()
                     .padding(16.dp)
                     .background(Color.Gray)
-            ){
+            ) {
                 item {
                     Row(Modifier.background(Color.Gray)) {
                         TableCell(text = "ROLLS", weight = column1Weight)
@@ -354,20 +383,13 @@ fun TableScreen(rounds: MutableState<Int>, pointsFilled: MutableState<Boolean>, 
                     }
                 }
                 item {
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Button(
                             modifier = Modifier.padding(20.dp),
-                            onClick = {
-                                if ( lastIndex > -1 && rollScores[lastIndex] != -1
-                                    && rounds.value > 0
-                                ) {
-                                    pointsFilled.value = true
-                                    lastIndex = -1
-                                    rounds.value -= 1
-                                    openDialog.value = !openDialog.value
-                                }
-                            })
+                            onClick = { acceptRound() })
                         {
                             Text(text = "Accept", fontSize = 24.sp)
                         }
