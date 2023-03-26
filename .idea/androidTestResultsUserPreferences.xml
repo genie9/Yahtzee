@@ -3,7 +3,7 @@
   <component name="AndroidTestResultsUserPreferences">
     <option name="androidTestResultsTableState">
       <map>
-        <entry key="-1668068748">
+        <entry key="-1805720792">
           <value>
             <AndroidTestResultsTableState>
               <option name="preferredColumnWidths">
@@ -12,6 +12,34 @@
                   <entry key="Tests" value="360" />
                   <entry key="adb-RF8M505NX1V-GPexQV._adb-tls-connect._tcp" value="120" />
                   <entry key="samsung&#10; SM-G970F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-1668068748">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Pixel_3a_API_33_x86_64" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RF8M505NX1V-GPexQV._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-G970F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-1649551869">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Pixel_3a_API_33_x86_64" value="120" />
+                  <entry key="Tests" value="360" />
                 </map>
               </option>
             </AndroidTestResultsTableState>

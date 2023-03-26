@@ -39,12 +39,26 @@ class YahtzeeUITest {
     }
 
     @Test
-    fun mustFillPoints(){
+    fun mustFillRoundPointsOrAcceptDisabled(){
         composeTestRule.onNodeWithText("Roll").performClick()
         composeTestRule.onNodeWithText("Points Sheet").performClick()
         composeTestRule.onNodeWithText("Accept").assertIsNotEnabled()
         composeTestRule.onNodeWithTag("points_0").performClick()
         composeTestRule.onNodeWithText("Accept").assertIsEnabled()
+    }
+
+    @Test
+    fun onLastRoundRollDisabled(){
+        for (i in 0..2) {
+            composeTestRule.onNodeWithText("Roll").performClick()
+        }
+        composeTestRule.onNodeWithText("Roll").assertIsNotEnabled()
+
+        // Visiting "points sheet" not affecting "Roll" button
+        composeTestRule.onNodeWithText("Points Sheet").performClick()
+        composeTestRule.onNodeWithTag("points_0").performClick()
+        composeTestRule.onNodeWithText("Back").performClick()
+        composeTestRule.onNodeWithText("Roll").assertIsNotEnabled()
     }
 
     @Test

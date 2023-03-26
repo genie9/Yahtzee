@@ -66,6 +66,7 @@ fun YahtzeeMain() {
     val results: MutableList<Int> = remember { mutableListOf(1, 1, 1, 1, 1) }
     val rounds: MutableState<Int> = remember { mutableStateOf(13) }
     var rerolls by remember { mutableStateOf(3) }
+    var enableRoll = remember { mutableStateOf(true) }
     val rollScores = remember {
         mutableStateListOf<Int>()
             .apply { addAll(List(16) { -1 }) }
@@ -85,7 +86,7 @@ fun YahtzeeMain() {
     @VisibleForTesting
     fun newRoundActions() {
         rerolls = 3
-        //results.replaceAll { 1 }
+        enableRoll.value = true
         lockedDices.replaceAll { false }
         pointsFilled.value = false
         rerolls = roll(rerolls, lockedDices, results)
@@ -166,9 +167,13 @@ fun YahtzeeMain() {
                 )
             }
         } else {
-            Button(onClick = {
-                rerolls = roll(rerolls, lockedDices, results)
-                //if (rerolls > 0) rerolls -= 1
+            Button(
+                enabled = enableRoll.value,
+                onClick = {
+                    rerolls = roll(rerolls, lockedDices, results)
+                    if (pointsFilled.value == false && rerolls == 0){
+                        enableRoll.value = false
+                    }
             })
             {
                 Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
