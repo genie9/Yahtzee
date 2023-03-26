@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.example.yahtzee
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -96,6 +97,37 @@ fun YahtzeeMain() {
         }
     }
 
+    @Composable
+    fun RollingButton(height: Int, width: Int) {
+        if (rerolls <= 3 && pointsFilled.value) {
+            Button(modifier = Modifier
+                .height(height.dp)
+                .width(width.dp), onClick = {
+                newRoundActions()
+            })
+            {
+                Text(
+                    text = if (rounds.value == 0) stringResource(R.string.new_game)
+                    else stringResource(R.string.new_round), fontSize = 24.sp
+                )
+            }
+        } else {
+            Button(modifier = Modifier
+                .height(height.dp)
+                .width(width.dp),
+                enabled = enableRoll.value,
+                onClick = {
+                    rerolls = roll(rerolls, lockedDices, results)
+                    if (pointsFilled.value == false && rerolls == 0) {
+                        enableRoll.value = false
+                    }
+                })
+            {
+                Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -110,7 +142,7 @@ fun YahtzeeMain() {
                 rollScores[15]
             )
             else stringResource(R.string.rolls_info, rerolls),
-                fontSize = 28.sp
+            fontSize = 28.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -139,46 +171,32 @@ fun YahtzeeMain() {
                     )
                 }
             }
-            item {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    onClick = {
-                        openDialog.value = !openDialog.value
-                    }
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.points_sheet),
-                        modifier = Modifier.padding(0.dp)
-                    )
-                }
-            }
         }
         Spacer(modifier = Modifier.height(15.dp))
-        if (rerolls <= 3 && pointsFilled.value) {
-            Button(onClick = {
-                newRoundActions()
-            })
-            {
+
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            val height = 50
+            val width = 120
+            Button(
+                modifier = Modifier
+                    .height(height.dp)
+                    .width(width.dp),
+                //.fillMaxWidth()
+                //.padding(0.dp),
+                onClick = {
+                    openDialog.value = !openDialog.value
+                }
+            ) {
                 Text(
-                    text = if (rounds.value == 0) stringResource(R.string.new_game)
-                    else stringResource(R.string.new_round), fontSize = 24.sp
+                    text = stringResource(id = R.string.points_sheet),
+                    fontSize = 24.sp
                 )
             }
-        } else {
-            Button(
-                enabled = enableRoll.value,
-                onClick = {
-                    rerolls = roll(rerolls, lockedDices, results)
-                    if (pointsFilled.value == false && rerolls == 0){
-                        enableRoll.value = false
-                    }
-            })
-            {
-                Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
-            }
+            RollingButton(height, width)
         }
+
+
         TableScreen(
             rounds = rounds,
             pointsFilled = pointsFilled,
@@ -422,14 +440,16 @@ fun TableScreen(
                                 acceptRound()
                             })
                         {
-                            Text(text = stringResource(id = R.string.button_accept),
-                                fontSize = 24.sp)
+                            Text(
+                                text = stringResource(id = R.string.button_accept),
+                                fontSize = 24.sp
+                            )
                         }
                         Button(
                             modifier = Modifier.padding(20.dp),
                             onClick = { openDialog.value = !openDialog.value })
                         {
-                            Text(text = stringResource(id = R.string.button_back),fontSize = 24.sp)
+                            Text(text = stringResource(id = R.string.button_back), fontSize = 24.sp)
                         }
                     }
                 }

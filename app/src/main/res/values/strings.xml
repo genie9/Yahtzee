@@ -3,9 +3,9 @@
     <string name="roll">Roll</string>
     <string name="total_points_info">"Your total points are %1$s"</string>
     <string name="rolls_info">"Rolls left %1$s"</string>
-    <string name="points_sheet">Points Sheet</string>
+    <string name="points_sheet">Points</string>
     <string name="new_game">New Game</string>
-    <string name="new_round">New Round</string>
+    <string name="new_round">Next</string>
     <string name="column_rolls">ROLLS</string>
     <string name="column_points">POINTS</string>
     <string name="button_accept">Accept</string>
