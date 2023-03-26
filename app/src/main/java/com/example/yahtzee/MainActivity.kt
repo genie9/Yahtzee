@@ -85,9 +85,10 @@ fun YahtzeeMain() {
     @VisibleForTesting
     fun newRoundActions() {
         rerolls = 3
-        results.replaceAll { 1 }
+        //results.replaceAll { 1 }
         lockedDices.replaceAll { false }
         pointsFilled.value = false
+        rerolls = roll(rerolls, lockedDices, results)
         if (rounds.value == 0) {
             rounds.value = 13
             rollScores.apply { replaceAll { -1 } }
@@ -154,7 +155,7 @@ fun YahtzeeMain() {
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
-        if (rerolls < 3 && pointsFilled.value) {
+        if (rerolls <= 3 && pointsFilled.value) {
             Button(onClick = {
                 newRoundActions()
             })
@@ -166,8 +167,8 @@ fun YahtzeeMain() {
             }
         } else {
             Button(onClick = {
-                roll(rerolls, lockedDices, results)
-                if (rerolls > 0) rerolls -= 1
+                rerolls = roll(rerolls, lockedDices, results)
+                //if (rerolls > 0) rerolls -= 1
             })
             {
                 Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
@@ -185,7 +186,8 @@ fun YahtzeeMain() {
 }
 
 @VisibleForTesting
-fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>): MutableList<Int> {
+fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>): Int {
+    var rerolls = rerolls
     if (rerolls > 0) {
         if (!lockedDices.contains(true)) {
             results.replaceAll { Random.nextInt(1, 7) }
@@ -195,7 +197,8 @@ fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: Mutable
             }
         }
     }
-    return results
+    if (rerolls > 0) rerolls -= 1
+    return rerolls
 }
 
 @Composable
