@@ -40,6 +40,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.yahtzee.ui.theme.YahtzeeTheme
 import kotlin.random.Random
+import androidx.compose.ui.semantics.SemanticsProperties.TestTag
 
 class MainActivity : ComponentActivity() {
 

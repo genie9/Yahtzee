@@ -18,7 +18,8 @@
     android:width="200dp"
     android:height="250dp"
     android:viewportWidth="800"
-    android:viewportHeight="1000">
+    android:viewportHeight="1000"
+    android:contentDescription="@string/dice_1">
     <path
         android:fillAlpha="0.5"
         android:fillColor="#C5C4C4"
