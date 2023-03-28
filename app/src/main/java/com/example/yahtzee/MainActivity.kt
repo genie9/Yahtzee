@@ -22,7 +22,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -108,7 +108,7 @@ fun YahtzeeMain() {
             {
                 Text(
                     text = if (rounds.value == 0) stringResource(R.string.new_game)
-                    else stringResource(R.string.new_round), fontSize = 24.sp
+                    else stringResource(R.string.button_new_round), fontSize = 24.sp
                 )
             }
         } else {
@@ -134,7 +134,7 @@ fun YahtzeeMain() {
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(7.dp))
 
         Text(
             text = if (rounds.value == 0) stringResource(
@@ -142,34 +142,64 @@ fun YahtzeeMain() {
                 rollScores[15]
             )
             else stringResource(R.string.rolls_info, rerolls),
-            fontSize = 28.sp
+            fontSize = 26.sp
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val upperFour = results.slice(0..3)
+        val fifth = results[4]
 
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(0.dp),
-            horizontalArrangement = Arrangement.spacedBy(70.dp),
+            horizontalArrangement = Arrangement.spacedBy(30.dp),
         ) {
-            itemsIndexed(results) { index: Int, item: Int ->
+
+            itemsIndexed(upperFour) { index: Int, item: Int ->
                 Box(
-                    modifier = Modifier.clickable(onClick = {
-                        if (rerolls < 3) {
-                            lockedDices[index] = !lockedDices[index]
-                        }
-                    })
+                    modifier = Modifier
+                        .size(170.dp)
+                        .clickable(onClick = {
+                            if (rerolls < 3) {
+                                lockedDices[index] = !lockedDices[index]
+                            }
+                        })
                 ) {
                     Image(
                         painter = painterResource(id = diceImage[item - 1]),
-                        contentDescription = diceImage.indexOf(item).toString(),
+                        contentDescription = item.toString(),
                         modifier = Modifier
-                            .size(170.dp)
+                            .size(150.dp)
                             .background(
                                 color = if (lockedDices[index]) Color.Blue else Color.Gray,
-                                shape = CircleShape
+                                shape = RoundedCornerShape(10.dp)
                             )
                     )
+                    Spacer(modifier = Modifier.height(15.dp))
                 }
+            }
+
+        }
+        Row() {
+            Box(
+                modifier = Modifier
+                    .size(150.dp)
+                    .clickable(onClick = {
+                        if (rerolls < 3) {
+                            lockedDices[4] = !lockedDices[4]
+                        }
+                    })
+            ) {
+                Image(
+                    painter = painterResource(id = diceImage[fifth - 1]),
+                    contentDescription = fifth.toString(),
+                    modifier = Modifier
+                        .size(150.dp)
+                        .background(
+                            color = if (lockedDices[4]) Color.Blue else Color.Gray,
+                            shape = RoundedCornerShape(10.dp),
+                        )
+                )
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -182,8 +212,6 @@ fun YahtzeeMain() {
                 modifier = Modifier
                     .height(height.dp)
                     .width(width.dp),
-                //.fillMaxWidth()
-                //.padding(0.dp),
                 onClick = {
                     openDialog.value = !openDialog.value
                 }
