@@ -75,7 +75,17 @@ fun YahtzeeMain() {
     var enableRoll = remember { mutableStateOf(true) }
     val rollScores = remember {
         mutableStateListOf<Int>()
-            .apply { addAll(List(16) { -1 }) }
+            .apply { addAll(List(6) { -1 }) }
+            .apply { addAll(6, listOf(0, 0)) }
+            .apply { addAll(List(7) { -1 }) }
+            .apply { addAll (15, listOf(0)) }
+    }
+    val rollScoresLocked = remember {
+        mutableListOf<Boolean>()
+            .apply { addAll(List(6) { false }) }
+            .apply { addAll(6, listOf(true, true)) }
+            .apply { addAll(List(7) { false }) }
+            .apply { addAll (15, listOf(true)) }
     }
 
     val diceImage = listOf(
@@ -96,9 +106,20 @@ fun YahtzeeMain() {
         lockedDices.replaceAll { false }
         pointsFilled.value = false
         rerolls = roll(rerolls, lockedDices, results)
+        // New Game actions
         if (rounds.value == 0) {
             rounds.value = 13
-            rollScores.apply { replaceAll { -1 } }
+            rollScores.apply {clear()}
+                .apply { addAll(List(6) { -1 }) }
+                .apply { addAll(6, listOf(0, 0)) }
+                .apply { addAll(List(7) { -1 }) }
+                .apply { addAll(15, listOf(0)) }
+
+            rollScoresLocked.apply {clear()}
+                .apply { addAll(List(6) { false }) }
+                .apply { addAll(6, listOf(true, true)) }
+                .apply { addAll(List(7) { false }) }
+                .apply { addAll(15, listOf(true)) }
         }
     }
 
@@ -270,6 +291,7 @@ fun YahtzeeMain() {
             openDialog = openDialog,
             results = results,
             rollScores = rollScores,
+            rollScoresLocked = rollScoresLocked,
             rerolls = rerolls
         )
     }
@@ -277,8 +299,8 @@ fun YahtzeeMain() {
 
 @VisibleForTesting
 fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: MutableList<Int>): Int {
-    var rerolls = rerolls
-    if (rerolls > 0) {
+    var tempRerolls = rerolls
+    if (tempRerolls > 0) {
         if (!lockedDices.contains(true)) {
             results.replaceAll { Random.nextInt(1, 7) }
         } else {
@@ -287,8 +309,8 @@ fun roll(rerolls: Int, lockedDices: SnapshotStateList<Boolean>, results: Mutable
             }
         }
     }
-    if (rerolls > 0) rerolls -= 1
-    return rerolls
+    if (tempRerolls > 0) tempRerolls -= 1
+    return tempRerolls
 }
 
 @Composable
@@ -314,7 +336,8 @@ fun TableScreen(
     rerolls: Int,
     openDialog: MutableState<Boolean>,
     results: List<Int>,
-    rollScores: SnapshotStateList<Int>
+    rollScores: SnapshotStateList<Int>,
+    rollScoresLocked: MutableList<Boolean>
 ) {
 
     val column1Weight = .6f // 60%
@@ -336,8 +359,6 @@ fun TableScreen(
         rollScores[6] = upperTotal
         if (upperTotal >= 63) {
             rollScores[7] = 35
-        } else {
-            rollScores[7] = 0
         }
         return points
     }
@@ -424,7 +445,7 @@ fun TableScreen(
         text: String
     ) {
         fun checkIfFillable(): Boolean {
-            if (index !in intArrayOf(6, 7, 15)) {
+            if (!rollScoresLocked[index]){
                 if (lastIndex > -1) {
                     if (lastIndex in 0..5) {
                         rollScores[6] = rollScores[6].minus(rollScores[lastIndex])
@@ -443,7 +464,11 @@ fun TableScreen(
                 .weight(weight)
                 .height(32.dp)
                 .padding(4.dp)
-                .background(colorResource(id = R.color.light_brown))
+                .background(
+                if (index in rollScoresLocked.withIndex().filter { it.value }.map { it.index }
+                    ) colorResource(id = R.color.mid_brown) else
+                        colorResource(id = R.color.light_brown)
+                )
                 .testTag("points_$index")
                 .clickable(onClick = {
                     if (checkIfFillable()) {
@@ -458,6 +483,7 @@ fun TableScreen(
         if (lastIndex > -1 && rollScores[lastIndex] != -1
             && rounds.value > 0
         ) {
+            rollScoresLocked[lastIndex] = true
             pointsFilled.value = true
             lastIndex = -1
             rounds.value -= 1

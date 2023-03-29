@@ -17,7 +17,7 @@ class YahtzeeUITest {
     val composeTestRule = createComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    
+
     val roll = context.resources.getString(R.string.roll)
     val total_points_info = context.resources.getString(R.string.total_points_info).dropLast(4)
     val rolls_info = context.resources.getString(R.string.rolls_info).dropLast(4)
@@ -100,9 +100,18 @@ class YahtzeeUITest {
         composeTestRule.onNodeWithText("$total_points_info${total}").assertIsDisplayed()
         composeTestRule.onNodeWithText(new_game).assertIsDisplayed()
         composeTestRule.onNodeWithText(new_game).performClick()
+
+        // Assert points table reinitialized after starting new game
         composeTestRule.onNodeWithText(points_sheet).performClick()
-        for (i in 0..14) {
+        for (i in 0..5) {
             composeTestRule.onNodeWithTag("points_$i").assertTextEquals("", "")
         }
+        for (i in 8..14) {
+            composeTestRule.onNodeWithTag("points_$i").assertTextEquals("", "")
+        }
+        for (i in 6..7) {
+            composeTestRule.onNodeWithTag("points_$i").assertTextEquals("0", "0")
+        }
+        composeTestRule.onNodeWithTag("points_15").assertTextEquals("0", "0")
     }
 }
