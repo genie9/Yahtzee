@@ -15,6 +15,7 @@
  */
 package com.example.yahtzee
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,6 +25,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -31,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,7 +44,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.yahtzee.ui.theme.YahtzeeTheme
 import kotlin.random.Random
-import androidx.compose.ui.semantics.SemanticsProperties.TestTag
+
 
 class MainActivity : ComponentActivity() {
 
@@ -101,22 +105,38 @@ fun YahtzeeMain() {
     @Composable
     fun RollingButton(height: Int, width: Int) {
         if (rerolls <= 3 && pointsFilled.value) {
-            Button(modifier = Modifier
-                .height(height.dp)
-                .width(width.dp), onClick = {
-                newRoundActions()
-            })
+            // Next-button
+            Button(
+                modifier = Modifier
+                    .height(height.dp)
+                    .width(width.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.light_green),
+                    contentColor = colorResource(id = R.color.dark_brown),
+                ),
+                onClick = {
+                    newRoundActions()
+                })
             {
                 Text(
                     text = if (rounds.value == 0) stringResource(R.string.new_game)
-                    else stringResource(R.string.button_new_round), fontSize = 24.sp
+                    else stringResource(R.string.button_new_round),
+                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.body1
                 )
             }
         } else {
+            // Roll-button
             Button(modifier = Modifier
                 .height(height.dp)
                 .width(width.dp),
                 enabled = enableRoll.value,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.light_green),
+                    disabledBackgroundColor = colorResource(id = R.color.light_gray_green),
+                    contentColor = colorResource(id = R.color.dark_brown),
+                    disabledContentColor = colorResource(id = R.color.gray_green)
+                ),
                 onClick = {
                     rerolls = roll(rerolls, lockedDices, results)
                     if (pointsFilled.value == false && rerolls == 0) {
@@ -124,13 +144,18 @@ fun YahtzeeMain() {
                     }
                 })
             {
-                Text(text = stringResource(id = R.string.roll), fontSize = 24.sp)
+                Text(
+                    text = stringResource(id = R.string.roll),
+                    style = MaterialTheme.typography.body1,
+                    fontSize = 24.sp
+                )
             }
         }
     }
 
     Column(
         modifier = Modifier
+            .background(colorResource(id = R.color.light_brown))
             .fillMaxSize()
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -143,7 +168,9 @@ fun YahtzeeMain() {
                 rollScores[15]
             )
             else stringResource(R.string.rolls_info, rerolls),
-            fontSize = 26.sp
+            fontSize = 26.sp,
+            style = MaterialTheme.typography.body1,
+            color = colorResource(id = R.color.dark_brown),
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -172,14 +199,15 @@ fun YahtzeeMain() {
                         modifier = Modifier
                             .size(150.dp)
                             .background(
-                                color = if (lockedDices[index]) Color.Blue else Color.Gray,
+                                color =
+                                if (lockedDices[index]) colorResource(id = R.color.dark_green)
+                                else colorResource(id = R.color.gray_green),
                                 shape = RoundedCornerShape(10.dp)
                             )
                     )
                     Spacer(modifier = Modifier.height(15.dp))
                 }
             }
-
         }
         Row() {
             Box(
@@ -197,7 +225,9 @@ fun YahtzeeMain() {
                     modifier = Modifier
                         .size(150.dp)
                         .background(
-                            color = if (lockedDices[4]) Color.Blue else Color.Gray,
+                            color =
+                            if (lockedDices[4]) colorResource(id = R.color.dark_green)
+                            else colorResource(id = R.color.gray_green),
                             shape = RoundedCornerShape(10.dp),
                         )
                 )
@@ -209,17 +239,25 @@ fun YahtzeeMain() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             val height = 50
             val width = 120
+
+            // Points-button
             Button(
                 modifier = Modifier
                     .height(height.dp)
                     .width(width.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.light_green),
+                    contentColor = colorResource(id = R.color.dark_brown)
+                ),
                 onClick = {
                     openDialog.value = !openDialog.value
                 }
             ) {
                 Text(
                     text = stringResource(id = R.string.points_sheet),
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.body1,
+                    color = colorResource(id = R.color.dark_brown)
                 )
             }
             RollingButton(height, width)
@@ -263,8 +301,9 @@ fun RowScope.TableCell(
         Modifier
             .border(1.dp, Color.Black)
             .weight(weight)
+            .height(32.dp)
             .padding(4.dp)
-            .background(Color.White)
+            .background(colorResource(id = R.color.light_green))
     )
 }
 
@@ -377,6 +416,7 @@ fun TableScreen(
         return -1
     }
 
+    @SuppressLint("ResourceType")
     @Composable
     fun RowScope.TableCellClickable(
         index: Int,
@@ -395,12 +435,15 @@ fun TableScreen(
             }
             return false
         }
+
         Text(
             text = text,
             Modifier
                 .border(1.dp, Color.Black)
                 .weight(weight)
+                .height(32.dp)
                 .padding(4.dp)
+                .background(colorResource(id = R.color.light_brown))
                 .testTag("points_$index")
                 .clickable(onClick = {
                     if (checkIfFillable()) {
@@ -431,7 +474,7 @@ fun TableScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .background(Color.Gray)
+                    .background(colorResource(id = R.color.light_brown))
             ) {
                 item {
                     Row(Modifier.background(Color.Gray)) {
@@ -445,6 +488,8 @@ fun TableScreen(
                         )
                     }
                 }
+
+                // Points-view Table
                 items(rollNames) { rollName ->
                     Row(Modifier.fillMaxWidth()) {
                         val rollNameIndex = rollNames.indexOf(rollName)
@@ -457,28 +502,57 @@ fun TableScreen(
                         )
                     }
                 }
+
+                // Points-view Buttons
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
+                        val height = 50
+                        val width = 130
+
+                        // Accept-button
                         Button(
-                            modifier = Modifier.padding(20.dp),
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .height(height.dp)
+                                .width(width.dp),
                             enabled = enableAccept.value,
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = colorResource(id = R.color.light_green),
+                                disabledBackgroundColor = colorResource(id = R.color.light_gray_green),
+                                contentColor = colorResource(id = R.color.dark_brown),
+                                disabledContentColor = colorResource(id = R.color.gray_green)
+                            ),
                             onClick = {
                                 acceptRound()
                             })
                         {
                             Text(
                                 text = stringResource(id = R.string.button_accept),
-                                fontSize = 24.sp
+                                fontSize = 24.sp,
+                                style = MaterialTheme.typography.body1
                             )
                         }
+
+                        // Back-button
                         Button(
-                            modifier = Modifier.padding(20.dp),
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .height(height.dp)
+                                .width(width.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = colorResource(id = R.color.light_green),
+                                contentColor = colorResource(id = R.color.dark_brown)
+                            ),
                             onClick = { openDialog.value = !openDialog.value })
                         {
-                            Text(text = stringResource(id = R.string.button_back), fontSize = 24.sp)
+                            Text(
+                                text = stringResource(id = R.string.button_back),
+                                fontSize = 24.sp,
+                                style = MaterialTheme.typography.body1
+                            )
                         }
                     }
                 }
