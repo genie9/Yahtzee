@@ -32,7 +32,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -78,14 +77,14 @@ fun YahtzeeMain() {
             .apply { addAll(List(6) { -1 }) }
             .apply { addAll(6, listOf(0, 0)) }
             .apply { addAll(List(7) { -1 }) }
-            .apply { addAll (15, listOf(0)) }
+            .apply { addAll(15, listOf(0)) }
     }
     val rollScoresLocked = remember {
         mutableListOf<Boolean>()
             .apply { addAll(List(6) { false }) }
             .apply { addAll(6, listOf(true, true)) }
             .apply { addAll(List(7) { false }) }
-            .apply { addAll (15, listOf(true)) }
+            .apply { addAll(15, listOf(true)) }
     }
 
     val diceImage = listOf(
@@ -109,13 +108,13 @@ fun YahtzeeMain() {
         // New Game actions
         if (rounds.value == 0) {
             rounds.value = 13
-            rollScores.apply {clear()}
+            rollScores.apply { clear() }
                 .apply { addAll(List(6) { -1 }) }
                 .apply { addAll(6, listOf(0, 0)) }
                 .apply { addAll(List(7) { -1 }) }
                 .apply { addAll(15, listOf(0)) }
 
-            rollScoresLocked.apply {clear()}
+            rollScoresLocked.apply { clear() }
                 .apply { addAll(List(6) { false }) }
                 .apply { addAll(6, listOf(true, true)) }
                 .apply { addAll(List(7) { false }) }
@@ -221,8 +220,8 @@ fun YahtzeeMain() {
                             .size(150.dp)
                             .background(
                                 color =
-                                if (lockedDices[index]) colorResource(id = R.color.dark_green)
-                                else colorResource(id = R.color.gray_green),
+                                if (lockedDices[index]) colorResource(id = R.color.gray_green)
+                                else colorResource(id = R.color.light_brown),
                                 shape = RoundedCornerShape(10.dp)
                             )
                     )
@@ -247,8 +246,8 @@ fun YahtzeeMain() {
                         .size(150.dp)
                         .background(
                             color =
-                            if (lockedDices[4]) colorResource(id = R.color.dark_green)
-                            else colorResource(id = R.color.gray_green),
+                            if (lockedDices[4]) colorResource(id = R.color.gray_green)
+                            else colorResource(id = R.color.light_brown),
                             shape = RoundedCornerShape(10.dp),
                         )
                 )
@@ -321,7 +320,7 @@ fun RowScope.TableCell(
     Text(
         text = text,
         Modifier
-            .border(1.dp, Color.Black)
+            .border(1.dp, colorResource(id = R.color.dark_brown))
             .weight(weight)
             .height(32.dp)
             .padding(4.dp)
@@ -445,7 +444,7 @@ fun TableScreen(
         text: String
     ) {
         fun checkIfFillable(): Boolean {
-            if (!rollScoresLocked[index]){
+            if (!rollScoresLocked[index]) {
                 if (lastIndex > -1) {
                     if (lastIndex in 0..5) {
                         rollScores[6] = rollScores[6].minus(rollScores[lastIndex])
@@ -460,13 +459,16 @@ fun TableScreen(
         Text(
             text = text,
             Modifier
-                .border(1.dp, Color.Black)
+                .border(1.dp, colorResource(id = R.color.dark_brown))
                 .weight(weight)
                 .height(32.dp)
                 .padding(4.dp)
                 .background(
-                if (index in rollScoresLocked.withIndex().filter { it.value }.map { it.index }
-                    ) colorResource(id = R.color.mid_brown) else
+                    if (index in rollScoresLocked
+                            .withIndex()
+                            .filter { it.value }
+                            .map { it.index }
+                    ) colorResource(id = R.color.gray_green) else
                         colorResource(id = R.color.light_brown)
                 )
                 .testTag("points_$index")
@@ -503,7 +505,7 @@ fun TableScreen(
                     .background(colorResource(id = R.color.light_brown))
             ) {
                 item {
-                    Row(Modifier.background(Color.Gray)) {
+                    Row(Modifier.background(colorResource(id = R.color.gray_green) )) {
                         TableCell(
                             text = stringResource(id = R.string.column_rolls),
                             weight = column1Weight
