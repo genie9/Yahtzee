@@ -63,6 +63,38 @@ fun YahtzeeApp() {
     YahtzeeMain()
 }
 
+@Composable
+private fun ButtonDisableable(
+    pad: Int = 0,
+    height: Int,
+    width: Int,
+    enable: Boolean = true,
+    onButtonClicked: () -> Unit,
+    buttonText: String
+) {
+    Button(
+        modifier = Modifier
+            .padding(pad.dp)
+            .height(height.dp)
+            .width(width.dp),
+        enabled = enable,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = colorResource(id = R.color.light_green),
+            disabledBackgroundColor = colorResource(id = R.color.light_gray_green),
+            contentColor = colorResource(id = R.color.dark_brown),
+            disabledContentColor = colorResource(id = R.color.gray_green)
+        ),
+        onClick = onButtonClicked
+    )
+    {
+        Text(
+            text = buttonText,
+            fontSize = 24.sp,
+            style = MaterialTheme.typography.body1
+        )
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun YahtzeeMain() {
@@ -126,50 +158,27 @@ fun YahtzeeMain() {
     fun RollingButton(height: Int, width: Int) {
         if (rerolls <= 3 && pointsFilled.value) {
             // Next-button
-            Button(
-                modifier = Modifier
-                    .height(height.dp)
-                    .width(width.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.light_green),
-                    contentColor = colorResource(id = R.color.dark_brown),
-                ),
-                onClick = {
-                    newRoundActions()
-                })
-            {
-                Text(
-                    text = if (rounds.value == 0) stringResource(R.string.new_game)
-                    else stringResource(R.string.button_new_round),
-                    fontSize = 24.sp,
-                    style = MaterialTheme.typography.body1
-                )
-            }
+            ButtonDisableable(
+                height = height,
+                width = width,
+                onButtonClicked = { newRoundActions() },
+                buttonText = if (rounds.value == 0) stringResource(R.string.new_game)
+                    else stringResource(R.string.button_new_round)
+            )
         } else {
             // Roll-button
-            Button(modifier = Modifier
-                .height(height.dp)
-                .width(width.dp),
-                enabled = enableRoll.value,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.light_green),
-                    disabledBackgroundColor = colorResource(id = R.color.light_gray_green),
-                    contentColor = colorResource(id = R.color.dark_brown),
-                    disabledContentColor = colorResource(id = R.color.gray_green)
-                ),
-                onClick = {
+            ButtonDisableable(
+                height = height,
+                width = width,
+                enable = enableRoll.value,
+                onButtonClicked = {
                     rerolls = roll(rerolls, lockedDices, results)
-                    if (pointsFilled.value == false && rerolls == 0) {
+                    if (!pointsFilled.value && rerolls == 0) {
                         enableRoll.value = false
                     }
-                })
-            {
-                Text(
-                    text = stringResource(id = R.string.roll),
-                    style = MaterialTheme.typography.body1,
-                    fontSize = 24.sp
-                )
-            }
+                },
+                buttonText = stringResource(id = R.string.roll)
+            )
         }
     }
 
@@ -261,25 +270,14 @@ fun YahtzeeMain() {
             val width = 120
 
             // Points-button
-            Button(
-                modifier = Modifier
-                    .height(height.dp)
-                    .width(width.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.light_green),
-                    contentColor = colorResource(id = R.color.dark_brown)
-                ),
-                onClick = {
+            ButtonDisableable(
+                height = height,
+                width = width,
+                onButtonClicked = {
                     openDialog.value = !openDialog.value
-                }
-            ) {
-                Text(
-                    text = stringResource(id = R.string.points_sheet),
-                    fontSize = 24.sp,
-                    style = MaterialTheme.typography.body1,
-                    color = colorResource(id = R.color.dark_brown)
-                )
-            }
+                },
+                buttonText = stringResource(id = R.string.points_sheet)
+            )
             RollingButton(height, width)
         }
 
@@ -505,7 +503,7 @@ fun TableScreen(
                     .background(colorResource(id = R.color.light_brown))
             ) {
                 item {
-                    Row(Modifier.background(colorResource(id = R.color.gray_green) )) {
+                    Row(Modifier.background(colorResource(id = R.color.gray_green))) {
                         TableCell(
                             text = stringResource(id = R.string.column_rolls),
                             weight = column1Weight
@@ -541,47 +539,22 @@ fun TableScreen(
                         val width = 130
 
                         // Accept-button
-                        Button(
-                            modifier = Modifier
-                                .padding(20.dp)
-                                .height(height.dp)
-                                .width(width.dp),
-                            enabled = enableAccept.value,
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorResource(id = R.color.light_green),
-                                disabledBackgroundColor = colorResource(id = R.color.light_gray_green),
-                                contentColor = colorResource(id = R.color.dark_brown),
-                                disabledContentColor = colorResource(id = R.color.gray_green)
-                            ),
-                            onClick = {
-                                acceptRound()
-                            })
-                        {
-                            Text(
-                                text = stringResource(id = R.string.button_accept),
-                                fontSize = 24.sp,
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
-
+                        ButtonDisableable(
+                            height = height,
+                            width = width,
+                            pad = 20,
+                            enable = enableAccept.value,
+                            onButtonClicked = { acceptRound() },
+                            buttonText = stringResource(id = R.string.button_accept)
+                        )
                         // Back-button
-                        Button(
-                            modifier = Modifier
-                                .padding(20.dp)
-                                .height(height.dp)
-                                .width(width.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorResource(id = R.color.light_green),
-                                contentColor = colorResource(id = R.color.dark_brown)
-                            ),
-                            onClick = { openDialog.value = !openDialog.value })
-                        {
-                            Text(
-                                text = stringResource(id = R.string.button_back),
-                                fontSize = 24.sp,
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
+                        ButtonDisableable(
+                            height = height,
+                            width = width,
+                            pad = 20,
+                            onButtonClicked = { openDialog.value = !openDialog.value },
+                            buttonText = stringResource(id = R.string.button_back)
+                        )
                     }
                 }
             }
