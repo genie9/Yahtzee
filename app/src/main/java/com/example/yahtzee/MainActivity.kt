@@ -16,32 +16,34 @@
 package com.example.yahtzee
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.yahtzee.ui.theme.YahtzeeTheme
 
+
+private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate Called")
         setContent {
             YahtzeeTheme {
-                YahtzeeApp()
+                Surface(modifier = Modifier.fillMaxWidth().background(color = Color.Green)) {
+                    DiceScreen()
+                }
             }
         }
     }
 }
 
-@Preview
-@Composable
-fun YahtzeeApp() {
-    Surface(modifier = Modifier.fillMaxWidth()) {
-        DiceScreen()
-    }
-}
+
