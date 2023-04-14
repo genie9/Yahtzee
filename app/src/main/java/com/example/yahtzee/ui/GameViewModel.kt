@@ -2,8 +2,6 @@ package com.example.yahtzee.ui
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import com.example.yahtzee.data.DiceImages
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +13,7 @@ import kotlin.random.Random
 
 private const val TAG = "GameViewModel"
 
-class GameViewModel: ViewModel() {
+class GameViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
     val diceImage = DiceImages
@@ -60,6 +58,7 @@ class GameViewModel: ViewModel() {
 
             )
     }
+
     @VisibleForTesting
     fun roll() {
         Log.d(TAG, "Start Roll")
@@ -76,7 +75,7 @@ class GameViewModel: ViewModel() {
             }
         }
 
-        if (rerolls > 0) updateGameState(rerolls = rerolls.minus(1) )
+        if (rerolls > 0) updateGameState(rerolls = rerolls.minus(1))
         if (!_uiState.value.pointsFilled && _uiState.value.rerolls == 0) {
             updateGameState(enableRoll = false)
         }
@@ -143,10 +142,12 @@ class GameViewModel: ViewModel() {
                 pointsFilled = true,
                 lastIndex = -1,
                 rounds = _uiState.value.rounds.minus(1),
-                enableAccept = false)
-            updateDialogState(!_uiState.value.openDialog)
+                enableAccept = false
+            )
+
         }
     }
+
     fun checkIfFillable(index: Int): Boolean {
         val rollScores = _uiState.value.rollScores
         val lastIndex = _uiState.value.lastIndex
@@ -180,12 +181,6 @@ class GameViewModel: ViewModel() {
                 lastIndex = lastIndex,
                 enableAccept = enableAccept
             )
-        }
-    }
-
-    fun updateDialogState(openDialog: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(openDialog = !_uiState.value.openDialog)
         }
     }
 

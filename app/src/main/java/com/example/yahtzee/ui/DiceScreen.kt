@@ -20,17 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.yahtzee.data.DiceImages
 import com.example.yahtzee.ui.GameUiState
 import com.example.yahtzee.ui.GameViewModel
 import com.example.yahtzee.ui.theme.ButtonDisableable
-import com.example.yahtzee.ui.theme.PointsScreen
-import com.example.yahtzee.ui.theme.YahtzeeTheme
-
 
 
 private const val TAG = "DiceScreen"
@@ -39,10 +36,10 @@ private const val TAG = "DiceScreen"
 @Composable
 fun DiceScreen(
     modifier: Modifier = Modifier,
-    gameViewModel: GameViewModel = viewModel()
+    gameViewModel: GameViewModel = viewModel(),
+    navController: NavController
 ) {
     val gameUiState by gameViewModel.uiState.collectAsState()
-    //tästä alas
 
     Column(
         modifier
@@ -129,27 +126,23 @@ fun DiceScreen(
             ButtonDisableable(
                 height = height,
                 width = width,
-                onButtonClicked = {
-                    Log.d(TAG, "onButtonClicked openDialog")
-
-                    //gameViewModel.openDialog = !gameViewModel.openDialog
-                    gameViewModel.updateDialogState(!gameUiState.openDialog)
-                },
+                onButtonClicked = { navController.navigate(YahtzeeScreen.Points.name) },
                 buttonText = stringResource(id = R.string.points_sheet)
             )
             // Roll (Next) button
             RollingButton(height, width, gameUiState, gameViewModel, results)
         }
-
-        // Pop up fillable points screen
-        PointsScreen(
-            gameViewModel = GameViewModel(),
-        )
     }
 }
 
 @Composable
-fun RollingButton(height: Int, width: Int, gameUiState: GameUiState, gameViewModel: GameViewModel, results: List<Int>) {
+fun RollingButton(
+    height: Int,
+    width: Int,
+    gameUiState: GameUiState,
+    gameViewModel: GameViewModel,
+    results: List<Int>
+) {
     Log.d(TAG, "Enter roll button")
     if (gameUiState.rerolls <= 3 && gameUiState.pointsFilled) {
         // Next-button
@@ -169,16 +162,10 @@ fun RollingButton(height: Int, width: Int, gameUiState: GameUiState, gameViewMod
             onButtonClicked = {
                 Log.d(TAG, "Click roll")
                 gameViewModel.roll()
-                Log.d(TAG, "Exit roll, results ${results.toList()}") },
+                Log.d(TAG, "Exit roll, results ${results.toList()}")
+            },
             buttonText = stringResource(id = R.string.roll)
         )
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun YahtzeeScreenPreview() {
-    YahtzeeTheme() {
-        DiceScreen()
-    }
-}
