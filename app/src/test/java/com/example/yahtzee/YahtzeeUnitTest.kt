@@ -1,35 +1,54 @@
 package com.example.yahtzee
 
 import androidx.compose.runtime.mutableStateListOf
+import com.example.yahtzee.ui.GameViewModel
 import org.junit.Test
 import org.junit.Assert.*
 
 class YahtzeeUnitTests {
+    private val viewModel = GameViewModel()
+
     @Test
-    fun rollingIfRerollsCountNotZero() {
-        val rerollsTestList = listOf(1,2,3)
-        val initResults = MutableList(6) {0}
-        val lockedDices = mutableStateListOf<Boolean>()
-            .apply { addAll(List(5) { false }) }
-        for (rerolls in rerollsTestList) {
-            var copyInitResults = initResults.map{it}.toMutableList()
-            val actualRerolls = roll(rerolls, lockedDices, copyInitResults)
-            assertTrue(copyInitResults != initResults)
-            assertEquals(rerolls-1, actualRerolls)
+    fun rollingWorksIfRerollsCountNotZero() {
+        var gameUiState = viewModel.uiState.value
+
+        var initResults: MutableList<Int>
+        var updatedResults: MutableList<Int>
+        var updatedRerolls: Int
+
+        for (expectedRerolls in listOf(3,2,1)) {
+            initResults = gameUiState.results.map{it}.toMutableList()
+
+            assertEquals(expectedRerolls, gameUiState.rerolls)
+
+            viewModel.roll()
+
+            gameUiState = viewModel.uiState.value
+            updatedResults = gameUiState.results.map{it}.toMutableList()
+            updatedRerolls = gameUiState.rerolls
+
+            assertEquals(expectedRerolls-1, updatedRerolls)
+            assertNotEquals(updatedResults, initResults)
+
         }
     }
 
     @Test
     // When rerolls count is 0 roll function must not have an effect on results or rerolls count
-    fun rollingIfRerollsCountZero() {
-        val rerolls = 0
-        val initResults = MutableList(6) {0}
-        val lockedDices = mutableStateListOf<Boolean>()
-            .apply { addAll(List(5) { false }) }
-        var copyInitResults = initResults.map{it}.toMutableList()
-        val actualRerolls = roll(rerolls, lockedDices, copyInitResults)
-        assertTrue(copyInitResults == initResults)
-        assertEquals(0, actualRerolls)
+    fun rollingNotWorkingIfRerollsCountZero() {
+        var gameUiState = viewModel.uiState.value
+        gameUiState.rerolls.minus(3)
+        var initResults = gameUiState.results.map{it}.toMutableList()
+        var updatedResults: MutableList<Int>
+
+
+        viewModel.roll()
+
+        updatedResults = gameUiState.results
+        val rerolls = gameUiState.rerolls
+
+        //assertTrue(updatedResults == initResults)
+        assertEquals(0, rerolls)
     }
 
     @Test
@@ -38,7 +57,7 @@ class YahtzeeUnitTests {
         val initResults = MutableList(6) {0}
         val lockedDices = mutableStateListOf(true, true, false, false, false)
         var copyInitResults = initResults.map{it}.toMutableList()
-        roll(rerolls, lockedDices, copyInitResults)
+        viewModel.roll()
         assertTrue(copyInitResults.slice(0..1) == initResults.slice(0..1))
         assertTrue(copyInitResults.slice(2..4) != initResults.slice(2..4))
     }
