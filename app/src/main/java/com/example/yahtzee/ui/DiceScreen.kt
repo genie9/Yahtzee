@@ -1,6 +1,5 @@
-package com.example.yahtzee
+package com.example.yahtzee.ui
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,8 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -22,12 +19,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.yahtzee.R
+import com.example.yahtzee.YahtzeeScreen
 import com.example.yahtzee.data.DiceImages
-import com.example.yahtzee.ui.GameUiState
-import com.example.yahtzee.ui.GameViewModel
-import com.example.yahtzee.ui.theme.ButtonDisableable
 
 
 private const val TAG = "DiceScreen"
@@ -36,11 +31,18 @@ private const val TAG = "DiceScreen"
 @Composable
 fun DiceScreen(
     modifier: Modifier = Modifier,
-    gameViewModel: GameViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    results: MutableList<Int>,
+    lockedDices: MutableList<Boolean>,
+    rerolls: Int,
+    rounds: Int,
+    enableRoll: Boolean,
+    pointsAccepted: Boolean,
+    rollScores: MutableList<Int>,
+    onDiceClick: (Int) -> Unit = {},
+    onNextButtonClick: () -> Unit = {},
+    onRollClicked: () -> Unit = {}
 ) {
-    val gameUiState by gameViewModel.uiState.collectAsState()
-
     Column(
         modifier
             .background(colorResource(id = R.color.light_brown))
@@ -54,15 +56,15 @@ fun DiceScreen(
             fontSize = 24.sp,
             style = MaterialTheme.typography.body1,
             color = colorResource(id = R.color.dark_brown),
-            text = if (gameUiState.rounds == 0) stringResource(
+            text = if (rounds == 0) stringResource(
                 id = R.string.total_points_info,
-                gameUiState.rollScores[15]
+                rollScores[15]
             )
-            else stringResource(R.string.rolls_info, gameUiState.rerolls),
+            else stringResource(R.string.rolls_info, rerolls),
         )
         Spacer(modifier.height(12.dp))
 
-        val results = gameUiState.results
+        //val results = gameUiState.results
         val upperFour = results.slice(0..3)
         val fifth = results[4]
 
@@ -77,7 +79,8 @@ fun DiceScreen(
                 Box(
                     modifier = Modifier
                         .size(170.dp)
-                        .clickable(onClick = { gameViewModel.updateLockedDices(index) })
+                        // gameViewModel.updateLockedDices(index)
+                        .clickable(onClick = { if (!pointsAccepted) onDiceClick(index) })
                 ) {
                     Image(
                         painter = painterResource(id = DiceImages[item - 1]),
@@ -86,7 +89,7 @@ fun DiceScreen(
                             .size(150.dp)
                             .background(
                                 color =
-                                if (gameUiState.lockedDices[index]) colorResource(id = R.color.gray_green)
+                                if (lockedDices[index]) colorResource(id = R.color.gray_green)
                                 else colorResource(id = R.color.light_brown),
                                 shape = RoundedCornerShape(10.dp)
                             )
@@ -96,11 +99,11 @@ fun DiceScreen(
             }
         }
         // Fifth dice
-        Row() {
+        Row {
             Box(
                 modifier
                     .size(150.dp)
-                    .clickable(onClick = { gameViewModel.updateLockedDices(4) })
+                    .clickable(onClick = { if (!pointsAccepted) onDiceClick(4) })
             ) {
                 Image(
                     painter = painterResource(id = DiceImages[fifth - 1]),
@@ -109,7 +112,7 @@ fun DiceScreen(
                         .size(150.dp)
                         .background(
                             color =
-                            if (gameUiState.lockedDices[4]) colorResource(id = R.color.gray_green)
+                            if (lockedDices[4]) colorResource(id = R.color.gray_green)
                             else colorResource(id = R.color.light_brown),
                             shape = RoundedCornerShape(10.dp),
                         )
@@ -130,7 +133,15 @@ fun DiceScreen(
                 buttonText = stringResource(id = R.string.points_sheet)
             )
             // Roll (Next) button
-            RollingButton(height, width, gameUiState, gameViewModel, results)
+            RollingButton(
+                height = height,
+                width = width,
+                pointsAccepted = pointsAccepted,
+                rounds = rounds,
+                enableRoll = enableRoll,
+                onNextButtonClick = onNextButtonClick,
+                onRollClicked = onRollClicked
+            )
         }
     }
 }
@@ -139,18 +150,19 @@ fun DiceScreen(
 fun RollingButton(
     height: Int,
     width: Int,
-    gameUiState: GameUiState,
-    gameViewModel: GameViewModel,
-    results: List<Int>
+    pointsAccepted: Boolean,
+    rounds: Int,
+    enableRoll: Boolean,
+    onNextButtonClick: () -> Unit = {},
+    onRollClicked: () -> Unit = {}
 ) {
-    Log.d(TAG, "Enter roll button")
-    if (gameUiState.rerolls <= 3 && gameUiState.pointsFilled) {
+    if (pointsAccepted) {
         // Next-button
         ButtonDisableable(
             height = height,
             width = width,
-            onButtonClicked = { gameViewModel.newRoundActions() },
-            buttonText = if (gameUiState.rounds == 0) stringResource(R.string.new_game)
+            onButtonClicked = { onNextButtonClick() },
+            buttonText = if (rounds == 0) stringResource(R.string.new_game)
             else stringResource(R.string.button_new_round)
         )
     } else {
@@ -158,11 +170,9 @@ fun RollingButton(
         ButtonDisableable(
             height = height,
             width = width,
-            enable = gameUiState.enableRoll,
+            enable = enableRoll, //gameViewModel.uiState.value.enableRoll,
             onButtonClicked = {
-                Log.d(TAG, "Click roll")
-                gameViewModel.roll()
-                Log.d(TAG, "Exit roll, results ${results.toList()}")
+                onRollClicked()
             },
             buttonText = stringResource(id = R.string.roll)
         )

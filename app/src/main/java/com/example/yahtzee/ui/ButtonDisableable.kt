@@ -1,4 +1,4 @@
-package com.example.yahtzee.ui.theme
+package com.example.yahtzee.ui
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding

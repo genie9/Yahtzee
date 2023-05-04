@@ -18,74 +18,75 @@ class GameViewModel : ViewModel() {
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
     val diceImage = DiceImages
 
-    init {
-        _uiState.value.rollScores.apply { clear() }
-            .apply { addAll(List(6) { -1 }) }
-            .apply { addAll(6, listOf(0, 0)) }
-            .apply { addAll(List(7) { -1 }) }
-            .apply { addAll(15, listOf(0)) }
-        Log.d(TAG, "rollScores ${_uiState.value.rollScores.toList()}")
-        _uiState.value.rollScoresLocked.apply { clear() }
-            .apply { addAll(List(6) { false }) }
-            .apply { addAll(6, listOf(true, true)) }
-            .apply { addAll(List(7) { false }) }
-            .apply { addAll(15, listOf(true)) }
+    fun newGame() {
+        _uiState.value = GameUiState()
+        Log.i(TAG, "New Game started")
     }
 
     fun newRoundActions() {
-        var rounds = _uiState.value.rounds.minus(1)
-        roll()
-        _uiState.value.lockedDices.replaceAll { false }
-        // New Game actions
-        if (rounds == 0) {
-            rounds = 13
-            _uiState.value.rollScores.apply { clear() }
-                .apply { addAll(List(6) { -1 }) }
-                .apply { addAll(6, listOf(0, 0)) }
-                .apply { addAll(List(7) { -1 }) }
-                .apply { addAll(15, listOf(0)) }
-
-            _uiState.value.rollScoresLocked.apply { clear() }
-                .apply { addAll(List(6) { false }) }
-                .apply { addAll(6, listOf(true, true)) }
-                .apply { addAll(List(7) { false }) }
-                .apply { addAll(15, listOf(true)) }
+        //val rounds = _uiState.value.rounds.minus(1)
+        val lockedDices = _uiState.value.lockedDices
+        if (_uiState.value.rounds == 0) {
+            return newGame()
         }
-        updateGameState(
-            enableRoll = true,
-            rounds = rounds,
-            pointsFilled = false,
-
+        lockedDices.replaceAll { false }
+        _uiState.update { currentState ->
+            currentState.copy(
+                lockedDices = lockedDices,
+                rerolls = 3,
+                lastIndex = -1,
+                pointsAccepted = false,
+                enableRoll = true
             )
+        }
+        roll()
+        Log.i(TAG, "New Round started. Rounds left ${_uiState.value.rounds}")
     }
 
     @VisibleForTesting
     fun roll() {
-        Log.d(TAG, "Start Roll")
-        val rerolls = _uiState.value.rerolls
+        val randomGenerator = Random(System.currentTimeMillis())
         val results = _uiState.value.results
+        var rerolls = _uiState.value.rerolls
         if (rerolls > 0) {
             if (!_uiState.value.lockedDices.contains(true)) {
-                results.replaceAll { Random.nextInt(1, 7) }
-                Log.d(TAG, "Roll replace results ${results.toList()}")
+                results.replaceAll { randomGenerator.nextInt(1, 7) }
             } else {
                 for (i in 0..4) {
                     results[i] = if (_uiState.value.lockedDices[i]) results[i] else (1..6).random()
                 }
             }
+            rerolls = rerolls.minus(1)
+            _uiState.update { currentState ->
+                currentState.copy(
+                    results = results,
+                    rerolls = rerolls
+                )
+            }
         }
-
-        if (rerolls > 0) updateGameState(rerolls = rerolls.minus(1))
-        if (!_uiState.value.pointsFilled && _uiState.value.rerolls == 0) {
-            updateGameState(enableRoll = false)
+        if (rerolls == 0) {
+            _uiState.update { currentState ->
+                currentState.copy(enableRoll = false)
+            }
         }
-        Log.d(TAG, "End Roll")
+        Log.i(
+            TAG,
+            "Roll done, results: ${uiState.value.results.toList()}, " +
+                    "rerolls: ${uiState.value.rerolls}"
+        )
     }
 
     fun updateLockedDices(index: Int) {
+        val lockedDices = _uiState.value.lockedDices
         if (_uiState.value.rerolls < 3) {
-            _uiState.value.lockedDices[index] = !_uiState.value.lockedDices[index]
+            lockedDices[index] = !lockedDices[index]
+            _uiState.update { currentState ->
+                currentState.copy(
+                    lockedDices = lockedDices
+                )
+            }
         }
+        Log.i(TAG, "Locked dices updated: ${_uiState.value.lockedDices.toList()}")
     }
 
     fun upperStats(index: Int): Int {
@@ -95,9 +96,17 @@ class GameViewModel : ViewModel() {
         val upperScores = rollScores.slice(0..5).toMutableList()
         val upperTotal = upperScores.sumOf { if (it != -1) it else 0 }
         rollScores[6] = upperTotal
+        // check if bonus
         if (upperTotal >= 63) {
             rollScores[7] = 35
+            Log.i(TAG, "Bonus added")
         }
+        _uiState.update { currentState ->
+            currentState.copy(
+                rollScores = rollScores
+            )
+        }
+        Log.i(TAG, "Upper Total updated: ${_uiState.value.rollScores[6]}")
         return points
     }
 
@@ -105,6 +114,7 @@ class GameViewModel : ViewModel() {
         val results = _uiState.value.results
         val rollScores = _uiState.value.rollScores
         val score: Int
+
         if (rollScores[index] == -1 && _uiState.value.rerolls < 3) {
             score = when (index) {
                 in 0..5 -> upperStats(index)
@@ -119,38 +129,56 @@ class GameViewModel : ViewModel() {
                 }
                 else -> -1
             }
-            if (score != -1) {
-                updateGameState(lastIndex = index, enableAccept = true)
-            }
             rollScores[index] = score
             rollScores[15] =
                 rollScores.slice(6..14).toMutableList()
                     .sumOf { if (it != -1) it else 0 }
-            return score
+
+            if (score != -1) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        enableAccept = true,
+                        lastIndex = index,
+                        rollScores = rollScores
+                    )
+                }
+                Log.i(TAG, "ACCEPT enabled")
+            }
+        } else {
+            score = -1
         }
-        return -1
+        Log.i(TAG, "Points filled: $score")
+        return score
     }
 
     @VisibleForTesting
     fun acceptRound() {
+        val rounds = _uiState.value.rounds
+        val rollScoresLocked = _uiState.value.rollScoresLocked
         val lastIndex = _uiState.value.lastIndex
         if (lastIndex > -1 && _uiState.value.rollScores[lastIndex] != -1
-            && _uiState.value.rounds > 0
+            && rounds > 0
         ) {
-            _uiState.value.rollScoresLocked[lastIndex] = true
-            updateGameState(
-                pointsFilled = true,
-                lastIndex = -1,
-                rounds = _uiState.value.rounds.minus(1),
-                enableAccept = false
-            )
+            rollScoresLocked[lastIndex] = true
+            _uiState.update { currentState ->
+                currentState.copy(
+                    rounds = rounds.minus(1),
+                    rollScoresLocked = rollScoresLocked,
+                    pointsAccepted = true,
+                    lastIndex = -1,
+                    enableAccept = false
+                )
+            }
 
         }
+        Log.i(TAG, "Round accepted")
     }
 
+    // TODO: Investigate why this works without updating state of rollScores
     fun checkIfFillable(index: Int): Boolean {
         val rollScores = _uiState.value.rollScores
         val lastIndex = _uiState.value.lastIndex
+
         if (!_uiState.value.rollScoresLocked[index]) {
             if (lastIndex > -1) {
                 if (lastIndex in 0..5) {
@@ -158,30 +186,11 @@ class GameViewModel : ViewModel() {
                 }
                 rollScores[lastIndex] = -1
             }
+            Log.i(TAG, "Fillable: TRUE")
             return true
         }
+        Log.i(TAG, "Fillable: FALSE")
         return false
-    }
-
-    @VisibleForTesting
-    fun updateGameState(
-        rounds: Int = _uiState.value.rounds,
-        rerolls: Int = _uiState.value.rerolls,
-        enableRoll: Boolean = _uiState.value.enableRoll,
-        pointsFilled: Boolean = _uiState.value.pointsFilled,
-        lastIndex: Int = _uiState.value.lastIndex,
-        enableAccept: Boolean = _uiState.value.enableAccept,
-    ) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                rerolls = rerolls,
-                rounds = rounds,
-                enableRoll = enableRoll,
-                pointsFilled = pointsFilled,
-                lastIndex = lastIndex,
-                enableAccept = enableAccept
-            )
-        }
     }
 
     fun threeSame(results: List<Int>): Int {

@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 
 data class GameUiState(
     // Handling dices
-    val results: MutableList<Int> = mutableStateListOf(1, 1, 1, 1, 1),
+    val results: MutableList<Int> = mutableListOf(1, 1, 1, 1, 1),
     val lockedDices: MutableList<Boolean> = mutableStateListOf(false, false, false, false, false),
 
     // Game play variables
@@ -13,9 +13,9 @@ data class GameUiState(
     val lastIndex: Int = -1,
 
     // Handling layout
+    val pointsAccepted: Boolean = false,
     val enableRoll: Boolean = true,
     val enableAccept: Boolean = false,
-    val pointsFilled: Boolean = false,
 
     // Handling points
     val rollScores: MutableList<Int> =
