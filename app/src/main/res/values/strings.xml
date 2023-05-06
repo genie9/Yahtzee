@@ -5,7 +5,8 @@
     <string name="resume_game">Resume Game</string>Resume Game
     <string name="exit">Exit</string>
     <string name="roll">Roll</string>
-    <string name="total_points_info">"Your total points are %1$s"</string>
+    <string name="game_over">Game Over!</string>
+    <string name="total_points_info">"Your total score"</string>
     <string name="rolls_info">"Rolls left %1$s"</string>
     <string name="points_sheet">Points</string>
     <string name="new_game">New Game</string>

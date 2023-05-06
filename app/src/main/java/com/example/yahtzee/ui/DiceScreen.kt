@@ -18,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.example.yahtzee.R
 import com.example.yahtzee.data.DiceImages
 import com.example.yahtzee.ui.theme.YahtzeeTheme
@@ -52,7 +54,7 @@ fun DiceScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
         {
             Button(
@@ -77,13 +79,8 @@ fun DiceScreen(
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.body1,
                 color = colorResource(id = R.color.dark_brown),
-                text = if (rounds == 0) stringResource(
-                    id = R.string.total_points_info,
-                    rollScores[15]
-                )
-                else stringResource(R.string.rolls_info, rerolls),
-
-                )
+                text = stringResource(R.string.rolls_info, rerolls),
+            )
         }
         Spacer(modifier.height(30.dp))
 
@@ -158,11 +155,56 @@ fun DiceScreen(
                 height = height,
                 width = width,
                 pointsAccepted = pointsAccepted,
-                rounds = rounds,
                 enableRoll = enableRoll,
                 onNextButtonClick = onNextButtonClick,
                 onRollClicked = onRollClicked
             )
+        }
+    }
+    if (rounds == 0) {
+        Popup(alignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(250.dp)
+                    .background(
+                        color = colorResource(id = R.color.light_gray_green),
+                        shape = RoundedCornerShape(10.dp)
+                    ),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(5.dp, 30.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 35.sp,
+                    style = MaterialTheme.typography.body1,
+                    color = colorResource(id = R.color.dark_brown),
+                    text = stringResource(id = R.string.game_over)
+                )
+                Spacer(modifier.height(5.dp))
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(5.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 30.sp,
+                    style = MaterialTheme.typography.body1,
+                    color = colorResource(id = R.color.dark_brown),
+                    text = stringResource(id = R.string.total_points_info)
+                )
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(5.dp, 5.dp, 5.dp, 30.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 40.sp,
+                    style = MaterialTheme.typography.body1,
+                    color = colorResource(id = R.color.dark_brown),
+                    text = rollScores[15].toString()
+                )
+
+            }
         }
     }
 }
@@ -172,7 +214,6 @@ fun RollingButton(
     height: Int,
     width: Int,
     pointsAccepted: Boolean,
-    rounds: Int,
     enableRoll: Boolean,
     onNextButtonClick: () -> Unit = {},
     onRollClicked: () -> Unit = {}
@@ -183,8 +224,7 @@ fun RollingButton(
             height = height,
             width = width,
             onButtonClicked = { onNextButtonClick() },
-            buttonText = if (rounds == 0) stringResource(R.string.new_game)
-            else stringResource(R.string.button_new_round)
+            buttonText = stringResource(R.string.button_new_round)
         )
     } else {
         // Roll-button
