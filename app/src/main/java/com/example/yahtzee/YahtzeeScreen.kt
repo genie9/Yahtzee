@@ -1,6 +1,7 @@
 package com.example.yahtzee
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,18 +11,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.yahtzee.ui.DiceScreen
 import com.example.yahtzee.ui.GameViewModel
+import com.example.yahtzee.ui.MainMenuScreen
 import com.example.yahtzee.ui.PointsScreen
 
 private const val TAG = "YahtzeeApp"
 
 enum class YahtzeeScreen {
+    MainMenu,
     Dices,
     Points,
 }
@@ -51,13 +56,24 @@ fun YahtzeeApp(
 
         NavHost(
             navController = navController,
-            startDestination = YahtzeeScreen.Dices.name,
+            startDestination = YahtzeeScreen.MainMenu.name,
             modifier = modifier,
         ) {
+            composable(route = YahtzeeScreen.MainMenu.name) {
+                Log.i(TAG, "Navigate to MainMenuScreen")
+                val activity = (LocalContext.current as? Activity)
+                MainMenuScreen(
+                    onNewGameClicked = {
+                        gameViewModel.newGame()
+                        navigate(navController, "dices")
+                    },
+                    onResumeClicked = { navController.navigate(YahtzeeScreen.Dices.name) },
+                    onExitButtonClicked = { activity?.finish() }
+                )
+            }
             composable(route = YahtzeeScreen.Dices.name) {
                 Log.i(TAG, "Navigate to DiceScreen")
                 DiceScreen(
-                    navController = navController,
                     results = uiState.results,
                     lockedDices = uiState.lockedDices,
                     rerolls = uiState.rerolls,
@@ -65,6 +81,7 @@ fun YahtzeeApp(
                     enableRoll = uiState.enableRoll,
                     pointsAccepted = uiState.pointsAccepted,
                     rollScores = uiState.rollScores,
+                    onNavButtonClicked = { navigate(navController, it) },
                     onDiceClick = { gameViewModel.updateLockedDices(it) },
                     onNextButtonClick = { gameViewModel.newRoundActions() },
                     onRollClicked = { gameViewModel.roll() }
@@ -73,7 +90,6 @@ fun YahtzeeApp(
             composable(route = YahtzeeScreen.Points.name) {
                 Log.i(TAG, "Navigate to PointsScreen")
                 PointsScreen(
-                    navController = navController,
                     rollScoresLocked = uiState.rollScoresLocked,
                     enableAccept = uiState.enableAccept,
                     pointsAccepted = uiState.pointsAccepted,
@@ -84,9 +100,18 @@ fun YahtzeeApp(
                     },
                     onAcceptButtonClicked = {
                         gameViewModel.acceptRound()
-                        navController.navigate(YahtzeeScreen.Dices.name)
-                    })
+                        navigate(navController, "dices")
+                    },
+                    onNavButtonClicked = { navigate(navController, it) })
             }
         }
+    }
+}
+
+fun navigate(navController: NavController, routeName: String) {
+    when (routeName) {
+        "dices" -> navController.navigate(YahtzeeScreen.Dices.name)
+        "points" -> navController.navigate(YahtzeeScreen.Points.name)
+        "menu" -> navController.navigate(YahtzeeScreen.MainMenu.name)
     }
 }

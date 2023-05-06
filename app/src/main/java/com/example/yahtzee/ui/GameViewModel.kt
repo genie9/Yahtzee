@@ -24,7 +24,6 @@ class GameViewModel : ViewModel() {
     }
 
     fun newRoundActions() {
-        //val rounds = _uiState.value.rounds.minus(1)
         val lockedDices = _uiState.value.lockedDices
         if (_uiState.value.rounds == 0) {
             return newGame()

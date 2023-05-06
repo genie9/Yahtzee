@@ -9,20 +9,21 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.yahtzee.R
-import com.example.yahtzee.YahtzeeScreen
 import com.example.yahtzee.data.DiceImages
+import com.example.yahtzee.ui.theme.YahtzeeTheme
 
 
 private const val TAG = "DiceScreen"
@@ -31,7 +32,6 @@ private const val TAG = "DiceScreen"
 @Composable
 fun DiceScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     results: MutableList<Int>,
     lockedDices: MutableList<Boolean>,
     rerolls: Int,
@@ -39,6 +39,7 @@ fun DiceScreen(
     enableRoll: Boolean,
     pointsAccepted: Boolean,
     rollScores: MutableList<Int>,
+    onNavButtonClicked: (String) -> Unit = {},
     onDiceClick: (Int) -> Unit = {},
     onNextButtonClick: () -> Unit = {},
     onRollClicked: () -> Unit = {}
@@ -50,21 +51,42 @@ fun DiceScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier.height(7.dp))
-
-        Text(
-            fontSize = 24.sp,
-            style = MaterialTheme.typography.body1,
-            color = colorResource(id = R.color.dark_brown),
-            text = if (rounds == 0) stringResource(
-                id = R.string.total_points_info,
-                rollScores[15]
-            )
-            else stringResource(R.string.rolls_info, rerolls),
+        Box(
+            modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(modifier.height(12.dp))
+        {
+            Button(
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(40.dp)
+                    .align(Alignment.TopStart),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.light_gray_green)
+                ),
+                onClick = { onNavButtonClicked("menu") }
+            )
+            {
+                Icon(
+                    Icons.Filled.Menu,
+                    modifier = Modifier.size(36.dp),
+                    contentDescription = "menu icons",
+                )
+            }
+            Text(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                fontSize = 24.sp,
+                style = MaterialTheme.typography.body1,
+                color = colorResource(id = R.color.dark_brown),
+                text = if (rounds == 0) stringResource(
+                    id = R.string.total_points_info,
+                    rollScores[15]
+                )
+                else stringResource(R.string.rolls_info, rerolls),
 
-        //val results = gameUiState.results
+                )
+        }
+        Spacer(modifier.height(30.dp))
+
         val upperFour = results.slice(0..3)
         val fifth = results[4]
 
@@ -78,15 +100,14 @@ fun DiceScreen(
             itemsIndexed(upperFour) { index: Int, item: Int ->
                 Box(
                     modifier = Modifier
-                        .size(170.dp)
-                        // gameViewModel.updateLockedDices(index)
+                        .size(150.dp)
                         .clickable(onClick = { if (!pointsAccepted) onDiceClick(index) })
                 ) {
                     Image(
                         painter = painterResource(id = DiceImages[item - 1]),
                         contentDescription = item.toString(),
                         modifier
-                            .size(150.dp)
+                            .size(140.dp)
                             .background(
                                 color =
                                 if (lockedDices[index]) colorResource(id = R.color.gray_green)
@@ -102,7 +123,7 @@ fun DiceScreen(
         Row {
             Box(
                 modifier
-                    .size(150.dp)
+                    .size(140.dp)
                     .clickable(onClick = { if (!pointsAccepted) onDiceClick(4) })
             ) {
                 Image(
@@ -129,7 +150,7 @@ fun DiceScreen(
             ButtonDisableable(
                 height = height,
                 width = width,
-                onButtonClicked = { navController.navigate(YahtzeeScreen.Points.name) },
+                onButtonClicked = { onNavButtonClicked("points") },
                 buttonText = stringResource(id = R.string.points_sheet)
             )
             // Roll (Next) button
@@ -170,7 +191,7 @@ fun RollingButton(
         ButtonDisableable(
             height = height,
             width = width,
-            enable = enableRoll, //gameViewModel.uiState.value.enableRoll,
+            enable = enableRoll,
             onButtonClicked = {
                 onRollClicked()
             },
@@ -179,3 +200,21 @@ fun RollingButton(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun DiceScreenPreview() {
+    YahtzeeTheme {
+        DiceScreen(
+            results = mutableListOf(1, 2, 3, 4, 5),
+            lockedDices = mutableListOf(false, false, false, false, false),
+            rerolls = 3,
+            rounds = 13,
+            enableRoll = true,
+            pointsAccepted = false,
+            rollScores = mutableListOf<Int>()
+                .apply { addAll(List(6) { -1 }) }
+                .apply { addAll(6, listOf(0, 0)) }
+                .apply { addAll(List(7) { -1 }) }
+                .apply { addAll(15, listOf(0)) })
+    }
+}

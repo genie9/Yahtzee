@@ -4,18 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.yahtzee.R
-import com.example.yahtzee.YahtzeeScreen
 import com.example.yahtzee.data.ScoreNames
+import com.example.yahtzee.ui.theme.YahtzeeTheme
 
 
 private const val TAG = "PointsScreen"
@@ -23,13 +24,13 @@ private const val TAG = "PointsScreen"
 @Composable
 fun PointsScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     rollScores: MutableList<Int>,
     rollScoresLocked: MutableList<Boolean>,
     enableAccept: Boolean,
     pointsAccepted: Boolean,
     onPointCellClicked: (Int) -> Unit = {},
     onAcceptButtonClicked: () -> Unit = {},
+    onNavButtonClicked: (String) -> Unit = {},
 ) {
 
     val column1Weight = .6f // 60%
@@ -96,7 +97,7 @@ fun PointsScreen(
                     width = buttonWidth,
                     pad = 20,
                     onButtonClicked = {
-                        navController.navigate(YahtzeeScreen.Dices.name)
+                        onNavButtonClicked("dices")
                     },
                     buttonText = stringResource(id = R.string.button_back)
                 )
@@ -149,4 +150,25 @@ fun RowScope.TableCell(
             .background(colorResource(id = R.color.light_green)),
         color = colorResource(id = R.color.dark_brown)
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PointsScreenPreview() {
+    YahtzeeTheme {
+        PointsScreen(
+            rollScores = mutableListOf<Int>()
+                .apply { addAll(0, listOf(3, -1, 9, -1, 15, 18)) }
+                .apply { addAll(6, listOf(45, 0)) }
+                .apply { addAll(List(7) { -1 }) }
+                .apply { addAll(15, listOf(45)) },
+            rollScoresLocked = mutableListOf<Boolean>()
+                .apply { addAll(0, listOf(true, false, true, false, true, true)) }
+                .apply { addAll(6, listOf(true, true)) }
+                .apply { addAll(List(7) { false }) }
+                .apply { addAll(15, listOf(true)) },
+            enableAccept = true,
+            pointsAccepted = false
+        )
+    }
 }

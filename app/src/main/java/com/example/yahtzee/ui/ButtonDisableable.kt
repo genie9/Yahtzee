@@ -19,6 +19,7 @@ public fun ButtonDisableable(
     pad: Int = 0,
     height: Int,
     width: Int,
+    fontSize: Int = 24,
     enable: Boolean = true,
     onButtonClicked: () -> Unit,
     buttonText: String
@@ -40,7 +41,7 @@ public fun ButtonDisableable(
     {
         Text(
             text = buttonText,
-            fontSize = 24.sp,
+            fontSize = fontSize.sp,
             style = MaterialTheme.typography.body1
         )
     }
