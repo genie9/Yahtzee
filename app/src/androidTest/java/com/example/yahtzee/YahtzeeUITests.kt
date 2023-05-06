@@ -34,7 +34,6 @@ class YahtzeeUITest {
                 YahtzeeApp()
             }
         }
-
     }
 
     @Test
