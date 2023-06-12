@@ -1,13 +1,12 @@
 package com.example.yahtzee.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -30,7 +29,6 @@ import com.example.yahtzee.ui.theme.YahtzeeTheme
 
 private const val TAG = "DiceScreen"
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiceScreen(
     modifier: Modifier = Modifier,
@@ -89,7 +87,7 @@ fun DiceScreen(
 
         // First four dices
         LazyVerticalGrid(
-            cells = GridCells.Fixed(2),
+            columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalArrangement = Arrangement.spacedBy(30.dp),
         ) {
