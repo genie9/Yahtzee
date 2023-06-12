@@ -1,4 +1,4 @@
-package com.example.yahtzee.ui
+package com.yahtzee.ui
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.yahtzee.R
+import com.yahtzee.R
 
 @Composable
 public fun ButtonDisableable(

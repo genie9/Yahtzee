@@ -1,9 +1,9 @@
-package com.example.yahtzee.ui
+package com.yahtzee.ui
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
-import com.example.yahtzee.data.DiceImages
+import com.yahtzee.data.DiceImages
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,6 +1,6 @@
-package com.example.yahtzee.data
+package com.yahtzee.data
 
-import com.example.yahtzee.R
+import com.yahtzee.R
 
 
 val DiceImages = listOf(

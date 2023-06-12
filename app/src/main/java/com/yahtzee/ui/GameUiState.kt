@@ -1,4 +1,4 @@
-package com.example.yahtzee.ui
+package com.yahtzee.ui
 
 import androidx.compose.runtime.mutableStateListOf
 

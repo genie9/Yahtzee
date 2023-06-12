@@ -1,4 +1,4 @@
-package com.example.yahtzee.ui
+package com.yahtzee.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,9 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import com.example.yahtzee.R
-import com.example.yahtzee.data.DiceImages
-import com.example.yahtzee.ui.theme.YahtzeeTheme
+import com.yahtzee.R
+import com.yahtzee.data.DiceImages
+import com.yahtzee.ui.theme.YahtzeeTheme
 
 
 private const val TAG = "DiceScreen"

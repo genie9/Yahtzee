@@ -1,4 +1,4 @@
-package com.example.yahtzee.ui
+package com.yahtzee.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.yahtzee.R
-import com.example.yahtzee.ui.theme.YahtzeeTheme
+import com.yahtzee.R
+import com.yahtzee.ui.theme.YahtzeeTheme
 
 
 @Composable

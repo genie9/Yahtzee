@@ -1,8 +1,8 @@
-package com.example.yahtzee.data
+package com.yahtzee.data
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.example.yahtzee.R
+import com.yahtzee.R
 
 @Composable
 fun ScoreNames(): List<String> {

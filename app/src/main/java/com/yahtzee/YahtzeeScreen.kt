@@ -1,4 +1,4 @@
-package com.example.yahtzee
+package com.yahtzee
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -18,10 +18,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.yahtzee.ui.DiceScreen
-import com.example.yahtzee.ui.GameViewModel
-import com.example.yahtzee.ui.MainMenuScreen
-import com.example.yahtzee.ui.PointsScreen
+import com.yahtzee.ui.DiceScreen
+import com.yahtzee.ui.GameViewModel
+import com.yahtzee.ui.MainMenuScreen
+import com.yahtzee.ui.PointsScreen
 
 private const val TAG = "YahtzeeApp"
 

@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.compose.ui.semantics.SemanticsProperties.Text
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
-import com.example.yahtzee.ui.theme.YahtzeeTheme
+import com.yahtzee.ui.theme.YahtzeeTheme
+import com.yahtzee.YahtzeeApp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

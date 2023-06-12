@@ -1,7 +1,7 @@
 package com.example.yahtzee
 
 import androidx.compose.runtime.mutableStateListOf
-import com.example.yahtzee.ui.GameViewModel
+import com.yahtzee.ui.GameViewModel
 import org.junit.Test
 import org.junit.Assert.*
 
