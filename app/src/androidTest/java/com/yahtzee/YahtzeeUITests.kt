@@ -1,4 +1,4 @@
-package com.example.yahtzee
+package com.yahtzee
 
 import android.content.Context
 import androidx.compose.ui.semantics.SemanticsProperties.Text
