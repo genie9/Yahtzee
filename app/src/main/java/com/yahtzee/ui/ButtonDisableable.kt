@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,13 +23,15 @@ public fun ButtonDisableable(
     fontSize: Int = 24,
     enable: Boolean = true,
     onButtonClicked: () -> Unit,
-    buttonText: String
+    buttonText: String,
+    test_tag: String
 ) {
     Button(
         modifier = Modifier
             .padding(pad.dp)
             .height(height.dp)
-            .width(width.dp),
+            .width(width.dp)
+            .testTag(test_tag),
         enabled = enable,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = colorResource(id = R.color.light_green),

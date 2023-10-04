@@ -7,7 +7,6 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.yahtzee.ui.theme.YahtzeeTheme
-import com.yahtzee.YahtzeeApp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,14 +17,43 @@ class YahtzeeUITest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    val roll = context.resources.getString(R.string.roll)
-    val total_points_info = context.resources.getString(R.string.total_points_info).dropLast(4)
+    val total_points_info = context.resources.getString(R.string.total_points_info)
     val rolls_info = context.resources.getString(R.string.rolls_info).dropLast(4)
-    val points_sheet = context.resources.getString(R.string.points_sheet)
-    val new_game = context.resources.getString(R.string.new_game)
-    val new_round = context.resources.getString(R.string.button_new_round)
-    val button_accept = context.resources.getString(R.string.button_accept)
-    val button_back = context.resources.getString(R.string.button_back)
+
+    // helpers functions
+    private fun startGame() {
+        composeTestRule.onNodeWithTag("new_game_button").performClick()
+    }
+
+    private fun playOneRound(): String {
+        composeTestRule.onNodeWithTag("roll_button").performClick()
+        composeTestRule.onNodeWithTag("points_sheet_button").performClick()
+        composeTestRule.onNodeWithTag("points_0").performClick()
+        val points = composeTestRule.onNodeWithTag("points_0").fetchSemanticsNode().config
+            .getOrNull(Text)?.get(0).toString()
+        composeTestRule.onNodeWithTag("accept_button").performClick()
+
+        return points
+    }
+
+    private fun playAllRounds(): String {
+        var rounds: Int
+        var total = ""
+
+        for (ind in 0..12) {
+            rounds = if (ind > 5) ind + 2 else ind
+            composeTestRule.onNodeWithTag("roll_button").performClick()
+            composeTestRule.onNodeWithTag("points_sheet_button").performClick()
+            composeTestRule.onNodeWithTag("points_$rounds").performClick()
+            total = composeTestRule.onNodeWithTag("points_15").fetchSemanticsNode().config
+                .getOrNull(Text)?.get(0).toString()
+            composeTestRule.onNodeWithTag("accept_button").performClick()
+            if (rounds < 14) {
+                composeTestRule.onNodeWithTag("next_round_button").performClick()
+            }
+        }
+        return total
+    }
 
     @Before
     fun init() {
@@ -37,71 +65,84 @@ class YahtzeeUITest {
     }
 
     @Test
+    fun mainScreenHasAllElements() {
+        composeTestRule.onNodeWithText("ZEN YAHTZEE").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("new_game_button").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("resume_button").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("exit_button").assertIsDisplayed()
+    }
+
+    @Test
+    fun startingGameWorks() {
+        composeTestRule.onNodeWithTag("new_game_button").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("new_game_button").performClick()
+        composeTestRule.onNodeWithText("${rolls_info}3").assertIsDisplayed()
+    }
+
+    @Test
     fun canRollAndRollInfo() {
         val rerolls = listOf(3, 2, 1)
+
+        startGame()
+
         for (i in rerolls) {
             composeTestRule.onNodeWithText("$rolls_info${i}").assertIsDisplayed()
-            composeTestRule.onNodeWithText(roll).performClick()
+            composeTestRule.onNodeWithTag("roll_button").performClick()
         }
         composeTestRule.onNodeWithText("${rolls_info}0").assertIsDisplayed()
     }
 
     @Test
-    fun newRound() {
-        composeTestRule.onNodeWithText(roll).performClick()
-        composeTestRule.onNodeWithText(points_sheet).performClick()
-        composeTestRule.onNodeWithTag("points_0").performClick()
-        composeTestRule.onNodeWithText(button_accept).performClick()
-        composeTestRule.onNodeWithText(new_round).performClick()
+    fun nextRoundWorks() {
+        startGame()
+        playOneRound()
+        composeTestRule.onNodeWithTag("next_round_button").performClick()
+        composeTestRule.onNodeWithText("${rolls_info}2").assertIsDisplayed()
     }
 
     @Test
-    fun mustFillRoundPointsOrAcceptDisabled() {
-        composeTestRule.onNodeWithText(roll).performClick()
-        composeTestRule.onNodeWithText(points_sheet).performClick()
-        composeTestRule.onNodeWithText(button_accept).assertIsNotEnabled()
+    fun mustFillRoundPointsOrAcceptButtonDisabled() {
+        startGame()
+        composeTestRule.onNodeWithTag("roll_button").performClick()
+        composeTestRule.onNodeWithTag("points_sheet_button").performClick()
+        composeTestRule.onNodeWithTag("accept_button").assertIsNotEnabled()
         composeTestRule.onNodeWithTag("points_0").performClick()
-        composeTestRule.onNodeWithText(button_accept).assertIsEnabled()
+        composeTestRule.onNodeWithTag("accept_button").assertIsEnabled()
     }
 
     @Test
     fun onLastRoundRollDisabled() {
+        startGame()
         for (i in 0..2) {
-            composeTestRule.onNodeWithText(roll).performClick()
+            composeTestRule.onNodeWithTag("roll_button").performClick()
         }
-        composeTestRule.onNodeWithText(roll).assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("roll_button").assertIsNotEnabled()
 
         // Visiting "points sheet" not affecting "Roll" button
-        composeTestRule.onNodeWithText(points_sheet).performClick()
+        composeTestRule.onNodeWithTag("points_sheet_button").performClick()
         composeTestRule.onNodeWithTag("points_0").performClick()
-        composeTestRule.onNodeWithText(button_back).performClick()
-        composeTestRule.onNodeWithText(roll).assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("back_button").performClick()
+        composeTestRule.onNodeWithTag("roll_button").assertIsNotEnabled()
     }
 
     @Test
-    fun newGame() {
-        var ind: Int
-        var total = ""
+    fun gameTotalIsCorrect() {
+        startGame()
+        val total = playAllRounds()
+        composeTestRule.onNodeWithText("$total_points_info").assertIsDisplayed()
+        composeTestRule.onNodeWithText(total).assertIsDisplayed()
+    }
 
-        for (index in 0..12) {
-            ind = if (index > 5) index + 2 else index
-            composeTestRule.onNodeWithText(roll).performClick()
-            composeTestRule.onNodeWithText(points_sheet).performClick()
-            composeTestRule.onNodeWithTag("points_$ind").performClick()
-            total = composeTestRule.onNodeWithTag("points_15").fetchSemanticsNode().config
-                .getOrNull(Text)?.get(0).toString()
-            composeTestRule.onNodeWithText(button_accept).performClick()
-            if (ind < 14) {
-                composeTestRule.onNodeWithText(new_round).performClick()
-            }
-        }
+    @Test
+    fun newGameHasCleanPointsSheet() {
+        startGame()
+        playAllRounds()
 
-        composeTestRule.onNodeWithText("$total_points_info${total}").assertIsDisplayed()
-        composeTestRule.onNodeWithText(new_game).assertIsDisplayed()
-        composeTestRule.onNodeWithText(new_game).performClick()
+        composeTestRule.onNodeWithTag("menu_burger").performClick()
+        composeTestRule.onNodeWithTag("new_game_button").performClick()
 
         // Assert points table reinitialized after starting new game
-        composeTestRule.onNodeWithText(points_sheet).performClick()
+        composeTestRule.onNodeWithTag("points_sheet_button").performClick()
         for (i in 0..5) {
             composeTestRule.onNodeWithTag("points_$i").assertTextEquals("", "")
         }
@@ -113,4 +154,16 @@ class YahtzeeUITest {
         }
         composeTestRule.onNodeWithTag("points_15").assertTextEquals("0", "0")
     }
+
+    @Test
+    fun resumeGameWorks() {
+        startGame()
+        val points = playOneRound()
+
+        composeTestRule.onNodeWithTag("menu_burger").performClick()
+        composeTestRule.onNodeWithTag("resume_button").performClick()
+        composeTestRule.onNodeWithTag("points_sheet_button").performClick()
+        composeTestRule.onNodeWithTag("points_0").assertTextEquals(points, points)
+    }
+
 }

@@ -60,7 +60,8 @@ fun MainMenuScreen(
                 onButtonClicked = onNewGameClicked,
                 buttonText = stringResource(
                     id = R.string.start_new_game
-                )
+                ),
+                test_tag = "new_game_button"
             )
             Spacer(modifier.height(20.dp))
             ButtonDisableable(
@@ -70,7 +71,8 @@ fun MainMenuScreen(
                 onButtonClicked = onResumeClicked,
                 buttonText = stringResource(
                     id = R.string.resume_game
-                )
+                ),
+                test_tag = "resume_button"
             )
             Spacer(modifier.height(20.dp))
             ButtonDisableable(
@@ -79,7 +81,8 @@ fun MainMenuScreen(
                 onButtonClicked = onExitButtonClicked,
                 buttonText = stringResource(
                     id = R.string.exit
-                )
+                ),
+                test_tag = "exit_button"
             )
         }
     }

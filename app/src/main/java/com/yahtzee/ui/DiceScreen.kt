@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,7 +60,8 @@ fun DiceScreen(
                 modifier = Modifier
                     .height(40.dp)
                     .width(40.dp)
-                    .align(Alignment.TopStart),
+                    .align(Alignment.TopStart)
+                    .testTag("menu_burger"),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = colorResource(id = R.color.light_gray_green)
                 ),
@@ -70,6 +72,7 @@ fun DiceScreen(
                     Icons.Filled.Menu,
                     modifier = Modifier.size(36.dp),
                     contentDescription = "menu icons",
+
                 )
             }
             Text(
@@ -146,7 +149,8 @@ fun DiceScreen(
                 height = height,
                 width = width,
                 onButtonClicked = { onNavButtonClicked("points") },
-                buttonText = stringResource(id = R.string.points_sheet)
+                buttonText = stringResource(id = R.string.points_sheet),
+                test_tag = "points_sheet_button"
             )
             // Roll (Next) button
             RollingButton(
@@ -222,7 +226,8 @@ fun RollingButton(
             height = height,
             width = width,
             onButtonClicked = { onNextButtonClick() },
-            buttonText = stringResource(R.string.button_new_round)
+            buttonText = stringResource(R.string.button_new_round),
+            test_tag = "next_round_button"
         )
     } else {
         // Roll-button
@@ -233,7 +238,8 @@ fun RollingButton(
             onButtonClicked = {
                 onRollClicked()
             },
-            buttonText = stringResource(id = R.string.roll)
+            buttonText = stringResource(id = R.string.roll),
+            test_tag = "roll_button"
         )
     }
 }

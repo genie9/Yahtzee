@@ -89,7 +89,8 @@ fun PointsScreen(
                     pad = 20,
                     enable = enableAccept,
                     onButtonClicked = onAcceptButtonClicked,
-                    buttonText = stringResource(id = R.string.button_accept)
+                    buttonText = stringResource(id = R.string.button_accept),
+                    test_tag = "accept_button"
                 )
                 // Back-button
                 ButtonDisableable(
@@ -99,7 +100,8 @@ fun PointsScreen(
                     onButtonClicked = {
                         onNavButtonClicked("dices")
                     },
-                    buttonText = stringResource(id = R.string.button_back)
+                    buttonText = stringResource(id = R.string.button_back),
+                    test_tag = "back_button"
                 )
             }
         }
