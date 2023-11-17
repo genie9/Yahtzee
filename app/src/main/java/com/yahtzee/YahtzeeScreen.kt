@@ -2,6 +2,7 @@ package com.yahtzee
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,17 +36,20 @@ enum class YahtzeeScreen {
 @Composable
 fun YahtzeeApp(
     modifier: Modifier = Modifier,
+    appMediaPlayer: MediaPlayer,
     gameViewModel: GameViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
 
     // TODO: state recovery
-/*    // Get current back stack entry
+/*
+    // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
     val currentScreen = YahtzeeScreen.valueOf(
         backStackEntry?.destination?.route ?: YahtzeeScreen.Dices.name
-    )*/
+    )
+*/
 
     Surface(
         modifier = Modifier
@@ -53,6 +57,11 @@ fun YahtzeeApp(
             .background(color = Color.Green)
     ) {
         val uiState by gameViewModel.uiState.collectAsState()
+        val activity = (LocalContext.current as Activity)
+
+        val buttonMediaPlayer = MediaPlayer()
+        buttonMediaPlayer.setDataSource(activity.resources.openRawResourceFd(R.raw.click))
+        buttonMediaPlayer.prepareAsync()
 
         NavHost(
             navController = navController,
@@ -61,14 +70,23 @@ fun YahtzeeApp(
         ) {
             composable(route = YahtzeeScreen.MainMenu.name) {
                 Log.i(TAG, "Navigate to MainMenuScreen")
-                val activity = (LocalContext.current as? Activity)
                 MainMenuScreen(
                     onNewGameClicked = {
+                        buttonMediaPlayer.start()
                         gameViewModel.newGame()
+                        appMediaPlayer.start()
                         navigate(navController, "dices")
                     },
-                    onResumeClicked = { navController.navigate(YahtzeeScreen.Dices.name) },
-                    onExitButtonClicked = { activity?.finish() }
+                    onResumeClicked = {
+                        buttonMediaPlayer.start()
+                        navController.navigate(YahtzeeScreen.Dices.name)
+                        appMediaPlayer.start()
+                        },
+                    onExitButtonClicked = {
+                        buttonMediaPlayer.start()
+                        appMediaPlayer.stop()
+                        appMediaPlayer.release()
+                        activity.finish() }
                 )
             }
             composable(route = YahtzeeScreen.Dices.name) {
@@ -81,7 +99,15 @@ fun YahtzeeApp(
                     enableRoll = uiState.enableRoll,
                     pointsAccepted = uiState.pointsAccepted,
                     rollScores = uiState.rollScores,
-                    onNavButtonClicked = { navigate(navController, it) },
+                    onNavButtonClicked = {
+                        if (it == "menu") {
+                            appMediaPlayer.pause()
+                            if(! appMediaPlayer.isPlaying) {
+                                Log.w(TAG, "audio paused")
+                            }
+                        }
+                        navigate(navController, it)
+                    },
                     onDiceClick = { gameViewModel.updateLockedDices(it) },
                     onNextButtonClick = { gameViewModel.newRoundActions() },
                     onRollClicked = { gameViewModel.roll() }

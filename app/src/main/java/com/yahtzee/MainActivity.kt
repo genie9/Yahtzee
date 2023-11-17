@@ -1,40 +1,111 @@
-/*
- * Copyright (C) 2022 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.yahtzee
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.yahtzee.ui.theme.YahtzeeTheme
+import java.io.IOException
 
 
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
+    var appMediaPlayer: MediaPlayer = MediaPlayer()
+    var playing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate Called")
+
+        appMediaPlayer.setDataSource(this.resources.openRawResourceFd(R.raw.audio))
+        appMediaPlayer.prepareAsync()
+
         setContent {
             YahtzeeTheme {
-                YahtzeeApp()
+                YahtzeeApp(appMediaPlayer = appMediaPlayer)
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause Called")
+
+        playing = appMediaPlayer.isPlaying
+        if (playing) {
+            try {
+                appMediaPlayer.pause()
+            } catch (e: IOException) {
+                Log.e(TAG, "prepareAsync -> IOException")
+                e.printStackTrace()
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "prepareAsync -> IllegalArgumentException")
+                e.printStackTrace()
+            } catch (e: IllegalStateException) {
+                Log.e(TAG, "prepareAsync -> IllegalStateException")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume Called")
+        Log.d(TAG, appMediaPlayer.audioSessionId.toString())
+        Log.d(TAG, playing.toString())
+        if (playing) {
+            try {
+                appMediaPlayer.start()
+            } catch (e: IOException) {
+                Log.e(TAG, "prepareAsync -> IOException")
+                e.printStackTrace()
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "prepareAsync -> IllegalArgumentException")
+                e.printStackTrace()
+            } catch (e: IllegalStateException) {
+                Log.e(TAG, "prepareAsync -> IllegalStateException")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart Called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop Called")
+
+        appMediaPlayer.stop()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "onRestart Called")
+
+        try {
+            appMediaPlayer.prepare()
+        } catch (e: IOException) {
+            Log.e(TAG, "prepareAsync -> IOException")
+            e.printStackTrace()
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "prepareAsync -> IllegalArgumentException")
+            e.printStackTrace()
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "prepareAsync -> IllegalStateException")
+            e.printStackTrace()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy Called")
+
+        appMediaPlayer.stop()
+        appMediaPlayer.release()
+    }
 }
-
-
