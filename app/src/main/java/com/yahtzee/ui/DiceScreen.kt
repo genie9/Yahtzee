@@ -52,9 +52,7 @@ fun DiceScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        )
+        Box( modifier = Modifier.fillMaxWidth() )
         {
             Button(
                 modifier = Modifier
